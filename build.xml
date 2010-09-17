@@ -26,6 +26,7 @@
     <property name="lib.dir" location="lib"/>
 	<property name="app.name" value="fedoragsearch" />
 	<property name="war.name" value="${app.name}.war" />
+	<property name="nolibs.war.name" value="${app.name}-nolibs.war" />
 
 	<property name="junit.build.dir"		   location="${build.basedir}/junit"/>
 	<property name="junit.src.dir"             location="src/test/junit"/>
@@ -133,9 +134,6 @@
 		<copy file="src/WEB-INF/web-withAuthN.xml" todir="${build.dir}/WEB-INF" />
 		<copy file="src/WEB-INF/server-config.wsdd" todir="${build.dir}/WEB-INF" />
 		<copy file="src/WEB-INF/log4j.xml" todir="${build.dir}/WEB-INF/classes" />
-		<copy todir="${build.dir}/WEB-INF/lib" flatten="true">
-			<fileset dir="lib" excludes="servlet-api.jar"/>
-		</copy>
 		<copy todir="${plugin.dir}">
 			<fileset dir="bin"/>
 		</copy>
@@ -186,6 +184,10 @@
         <!--ant dir="../FgsConfig" target="prep" inheritAll="false"/-->
 		<delete file="${build.dir}/WEB-INF/web.xml" />
 		<copy file="src/WEB-INF/web-withoutAuthN.xml" tofile="${build.dir}/WEB-INF/web.xml" />
+	    <jar jarfile="${dist.dir}/${nolibs.war.name}" basedir="${build.dir}"/>
+		<copy todir="${build.dir}/WEB-INF/lib" flatten="true">
+			<fileset dir="lib" excludes="servlet-api.jar"/>
+		</copy>
 	    <jar jarfile="${dist.dir}/${war.name}" basedir="${build.dir}"/>
 	</target>
 
