@@ -184,6 +184,7 @@
         <!--ant dir="../FgsConfig" target="prep" inheritAll="false"/-->
 		<delete file="${build.dir}/WEB-INF/web.xml" />
 		<copy file="src/WEB-INF/web-withoutAuthN.xml" tofile="${build.dir}/WEB-INF/web.xml" />
+		<copy file="lib/axis.jar" tofile="${build.dir}/WEB-INF/lib/axis.jar" />
 	    <jar jarfile="${dist.dir}/${nolibs.war.name}" basedir="${build.dir}"/>
 		<copy todir="${build.dir}/WEB-INF/lib" flatten="true">
 			<fileset dir="lib" excludes="servlet-api.jar"/>
