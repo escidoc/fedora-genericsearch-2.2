@@ -37,8 +37,7 @@ import java.util.regex.Matcher;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.apache.commons.httpclient.Cookie;
-import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 
@@ -204,13 +203,12 @@ public class EscidocCoreAccessor {
         if (log.isDebugEnabled()) {
             log.debug("executing EscidocCoreAccessor, getXml");
         }
-        Cookie cookie = null;
+        BasicClientCookie cookie = null;
         try {
             if (accessAsAnonymousUser == null 
                     || !accessAsAnonymousUser.equals("true")) {
-                cookie = new Cookie();
-                cookie.setName(COOKIE_LOGIN);
-                cookie.setValue(EscidocConfiguration.getInstance().get(
+                cookie = new BasicClientCookie(COOKIE_LOGIN, 
+                        EscidocConfiguration.getInstance().get(
                         EscidocConfiguration.GSEARCH_PASSWORD));
             }
             String domain = "";
@@ -255,9 +253,8 @@ public class EscidocCoreAccessor {
                             Constants.CONTAINER_MEMBERS_URL)
                                 .replaceFirst(containerObjid));
         try {
-            Cookie cookie = new Cookie();
-            cookie.setName(COOKIE_LOGIN);
-            cookie.setValue(EscidocConfiguration.getInstance().get(
+            BasicClientCookie cookie = new BasicClientCookie(
+                    COOKIE_LOGIN, EscidocConfiguration.getInstance().get(
                     EscidocConfiguration.GSEARCH_PASSWORD));
             String result = connectionUtility.postRequestURLAsString(
                         new URL(EscidocConfiguration.getInstance().get(
@@ -319,13 +316,12 @@ public class EscidocCoreAccessor {
         StringBuffer resourceBuffer = new StringBuffer(Constants.ORG_UNIT_URL);
         resourceBuffer.append(ouObjid).append(
         		Constants.ORG_UNIT_PATH_LIST_URL_SUFFIX);
-        Cookie cookie = null;
+        BasicClientCookie cookie = null;
         try {
             if (accessAsAnonymousUser == null 
                     || !accessAsAnonymousUser.equals("true")) {
-                cookie = new Cookie();
-                cookie.setName(COOKIE_LOGIN);
-                cookie.setValue(EscidocConfiguration.getInstance().get(
+                cookie = new BasicClientCookie(
+                        COOKIE_LOGIN, EscidocConfiguration.getInstance().get(
                         EscidocConfiguration.GSEARCH_PASSWORD));
             }
             String result = connectionUtility.getRequestURLAsString(
@@ -391,9 +387,8 @@ public class EscidocCoreAccessor {
         StringBuffer resourceBuffer = new StringBuffer(Constants.CONTENT_MODEL_URL);
         resourceBuffer.append(cmObjid);
         try {
-            Cookie cookie = new Cookie();
-            cookie.setName(COOKIE_LOGIN);
-            cookie.setValue(EscidocConfiguration.getInstance().get(
+            BasicClientCookie cookie = new BasicClientCookie(
+                    COOKIE_LOGIN, EscidocConfiguration.getInstance().get(
                     EscidocConfiguration.GSEARCH_PASSWORD));
             String result = connectionUtility.getRequestURLAsString(
                     new URL(EscidocConfiguration.getInstance().get(
@@ -450,9 +445,8 @@ public class EscidocCoreAccessor {
                 		Constants.CONTEXT_PROPERTIES_URL)
         				.replaceFirst(cObjid));
         try {
-            Cookie cookie = new Cookie();
-            cookie.setName(COOKIE_LOGIN);
-            cookie.setValue(EscidocConfiguration.getInstance().get(
+            BasicClientCookie cookie = new BasicClientCookie(
+                    COOKIE_LOGIN, EscidocConfiguration.getInstance().get(
                     EscidocConfiguration.GSEARCH_PASSWORD));
             String result = connectionUtility.getRequestURLAsString(
                     new URL(EscidocConfiguration.getInstance().get(
@@ -507,9 +501,8 @@ public class EscidocCoreAccessor {
         StringBuffer resourceBuffer = new StringBuffer(Constants.USER_ACCOUNT_URL);
         resourceBuffer.append(uObjid);
         try {
-            Cookie cookie = new Cookie();
-            cookie.setName(COOKIE_LOGIN);
-            cookie.setValue(EscidocConfiguration.getInstance().get(
+            BasicClientCookie cookie = new BasicClientCookie(
+                    COOKIE_LOGIN, EscidocConfiguration.getInstance().get(
                     EscidocConfiguration.GSEARCH_PASSWORD));
             String result = connectionUtility.getRequestURLAsString(
                     new URL(EscidocConfiguration.getInstance().get(
