@@ -7,12 +7,17 @@
  */
 package dk.defxws.fedoragsearch.server;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.rmi.RemoteException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
@@ -21,6 +26,19 @@ import javax.xml.transform.stream.StreamSource;
 import org.apache.axis.AxisFault;
 import org.apache.log4j.Logger;
 
+import com.yourmediashelf.fedora.client.FedoraClientException;
+import com.yourmediashelf.fedora.client.FedoraCredentials;
+import com.yourmediashelf.fedora.client.request.GetDissemination;
+import com.yourmediashelf.fedora.client.response.FedoraResponse;
+import com.yourmediashelf.fedora.client.response.ListDatastreamsResponse;
+import com.yourmediashelf.fedora.generated.access.DatastreamType;
+
+import static com.yourmediashelf.fedora.client.FedoraClient.listDatastreams;
+import static com.yourmediashelf.fedora.client.FedoraClient.getDatastreamDissemination;
+import static com.yourmediashelf.fedora.client.FedoraClient.getDissemination;
+import static com.yourmediashelf.fedora.client.FedoraClient.export;
+
+import de.escidoc.core.common.exceptions.system.SystemException;
 import dk.defxws.fedoragsearch.server.errors.ConfigException;
 import dk.defxws.fedoragsearch.server.errors.FedoraObjectNotFoundException;
 import dk.defxws.fedoragsearch.server.errors.GenericSearchException;
@@ -43,6 +61,8 @@ public class GenericOperationsImpl implements Operations {
         Logger.getLogger(GenericOperationsImpl.class);
 
     private static final Map fedoraClients = new HashMap();
+
+    private static final Map fedoraRestClients = new HashMap();
 
     protected String fgsUserName;
     protected String indexName;
@@ -88,6 +108,33 @@ public class GenericOperationsImpl implements Operations {
             }
         } catch (Exception e) {
             throw new GenericSearchException("Error getting FedoraClient"
+                    + " for repository: " + repositoryName, e);
+        }
+    }
+
+    //MIH: Added for REST-Access
+    private static com.yourmediashelf.fedora.client.FedoraClient getRestFedoraClient(
+    		String repositoryName,
+    		String fedoraRest,
+    		String fedoraUser,
+    		String fedoraPass)
+            throws GenericSearchException {
+        try {
+            String user = fedoraUser; 
+            String clientId = user + "@" + fedoraRest;
+            synchronized (fedoraRestClients) {
+                if (fedoraRestClients.containsKey(clientId)) {
+                    return (com.yourmediashelf.fedora.client.FedoraClient) fedoraRestClients.get(clientId);
+                } else {
+                	com.yourmediashelf.fedora.client.FedoraClient restClient = 
+                		new com.yourmediashelf.fedora.client.FedoraClient(
+                				new FedoraCredentials(new URL(fedoraRest), user, fedoraPass));
+                    fedoraRestClients.put(clientId, restClient);
+                    return restClient;
+                }
+            }
+        } catch (Exception e) {
+            throw new GenericSearchException("Error getting FedoraRestClient"
                     + " for repository: " + repositoryName, e);
         }
     }
@@ -323,22 +370,62 @@ public class GenericOperationsImpl implements Operations {
             logger.info("getFoxmlFromPid" +
                     " pid="+pid +
                     " repositoryName="+repositoryName);
-        FedoraAPIM apim = getAPIM(repositoryName, 
-        		config.getFedoraSoap(repositoryName), 
-        		config.getFedoraUser(repositoryName), 
-        		config.getFedoraPass(repositoryName), 
-        		config.getTrustStorePath(repositoryName), 
-        		config.getTrustStorePass(repositoryName) );
-        
         String fedoraVersion = config.getFedoraVersion(repositoryName);
         String format = Constants.FOXML1_1.uri;
         if(fedoraVersion != null && fedoraVersion.startsWith("2.")) {
             format = Constants.FOXML1_0_LEGACY;
         }
+//        FedoraAPIM apim = getAPIM(repositoryName, 
+//        		config.getFedoraSoap(repositoryName), 
+//        		config.getFedoraUser(repositoryName), 
+//        		config.getFedoraPass(repositoryName), 
+//        		config.getTrustStorePath(repositoryName), 
+//        		config.getTrustStorePass(repositoryName) );
+//        
+//        try {
+//        	foxmlRecord = apim.export(pid, format, "public");
+//        } catch (RemoteException e) {
+//        	throw new FedoraObjectNotFoundException("Fedora Object "+pid+" not found at "+repositoryName, e);
+//        }
+    	//MIH: REST
+        InputStream inStr = null;
+        ByteArrayOutputStream out = null;
         try {
-        	foxmlRecord = apim.export(pid, format, "public");
-        } catch (RemoteException e) {
+        	com.yourmediashelf.fedora.client.FedoraClient restClient = 
+        		getRestFedoraClient(
+            		repositoryName, 
+            		config.getFedoraRest(repositoryName), 
+            		config.getFedoraUser(repositoryName),
+            		config.getFedoraPass(repositoryName) );
+        	FedoraResponse response = export(pid).format(format)
+        					.context("public").execute(restClient);
+            inStr = response.getEntityInputStream();
+            out = new ByteArrayOutputStream();
+            if (inStr != null) {
+                byte[] bytes = new byte[0xFFFF];
+                int i = -1;
+                while ((i = inStr.read(bytes)) > -1) {
+                    out.write(bytes, 0, i);
+                }
+                out.flush();
+                foxmlRecord = out.toByteArray();
+            }
+
+        } catch (FedoraClientException e) {
         	throw new FedoraObjectNotFoundException("Fedora Object "+pid+" not found at "+repositoryName, e);
+        } catch (IOException e) {
+            throw new GenericSearchException(e.getClass().getName()+": "+e.toString());
+        } finally {
+        	if (inStr != null) {
+        		try {
+        			inStr.close();
+        		} catch (IOException e) {}
+        	}
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException e) {}
+            }
         }
     }
     
@@ -347,12 +434,19 @@ public class GenericOperationsImpl implements Operations {
             String repositoryName,
             String dsId)
     throws GenericSearchException {
+//    	return getDatastreamText(pid, repositoryName, dsId,
+//                		config.getFedoraSoap(repositoryName), 
+//                		config.getFedoraUser(repositoryName), 
+//                		config.getFedoraPass(repositoryName), 
+//                		config.getTrustStorePath(repositoryName), 
+//                		config.getTrustStorePass(repositoryName) );
+    	//MIH: REST
     	return getDatastreamText(pid, repositoryName, dsId,
-                		config.getFedoraSoap(repositoryName), 
-                		config.getFedoraUser(repositoryName), 
-                		config.getFedoraPass(repositoryName), 
-                		config.getTrustStorePath(repositoryName), 
-                		config.getTrustStorePass(repositoryName) );
+        		config.getFedoraRest(repositoryName), 
+        		config.getFedoraUser(repositoryName), 
+        		config.getFedoraPass(repositoryName), 
+        		config.getTrustStorePath(repositoryName), 
+        		config.getTrustStorePass(repositoryName) );
     }
     
     public String getDatastreamText(
@@ -379,27 +473,71 @@ public class GenericOperationsImpl implements Operations {
         String mimetype = "";
         ds = null;
         if (dsId != null) {
+//            try {
+//                FedoraAPIA apia = getAPIA(
+//                		repositoryName, 
+//                		fedoraSoap, 
+//                		fedoraUser,
+//                		fedoraPass,
+//                		trustStorePath,
+//                		trustStorePass );
+//                MIMETypedStream mts = apia.getDatastreamDissemination(pid, 
+//                        dsId, null);
+//                if (mts==null) return "";
+//                ds = mts.getStream();
+//                mimetype = mts.getMIMEType();
+//            } catch (AxisFault e) {
+//                if (e.getFaultString().indexOf("DatastreamNotFoundException")>-1 ||
+//                        e.getFaultString().indexOf("DefaulAccess")>-1)
+//                    return new String();
+//                else
+//                    throw new GenericSearchException(e.getFaultString()+": "+e.toString());
+//            } catch (RemoteException e) {
+//                throw new GenericSearchException(e.getClass().getName()+": "+e.toString());
+//            }
+        	//MIH: REST
+            InputStream inStr = null;
+            ByteArrayOutputStream out = null;
             try {
-                FedoraAPIA apia = getAPIA(
+            	com.yourmediashelf.fedora.client.FedoraClient restClient = 
+            		getRestFedoraClient(
                 		repositoryName, 
                 		fedoraSoap, 
                 		fedoraUser,
-                		fedoraPass,
-                		trustStorePath,
-                		trustStorePass );
-                MIMETypedStream mts = apia.getDatastreamDissemination(pid, 
-                        dsId, null);
-                if (mts==null) return "";
-                ds = mts.getStream();
-                mimetype = mts.getMIMEType();
-            } catch (AxisFault e) {
-                if (e.getFaultString().indexOf("DatastreamNotFoundException")>-1 ||
-                        e.getFaultString().indexOf("DefaulAccess")>-1)
+                		fedoraPass );
+            	FedoraResponse response = getDatastreamDissemination(pid, dsId).execute(restClient);
+                inStr = response.getEntityInputStream();
+                out = new ByteArrayOutputStream();
+                if (inStr != null) {
+                    byte[] bytes = new byte[0xFFFF];
+                    int i = -1;
+                    while ((i = inStr.read(bytes)) > -1) {
+                        out.write(bytes, 0, i);
+                    }
+                    out.flush();
+                    ds = out.toByteArray();
+                }
+                mimetype = response.getMimeType();
+
+            } catch (FedoraClientException e) {
+                if (e.getMessage().indexOf("no path")>-1 ||
+                        e.getMessage().indexOf("DefaulAccess")>-1)
                     return new String();
                 else
-                    throw new GenericSearchException(e.getFaultString()+": "+e.toString());
-            } catch (RemoteException e) {
+                    throw new GenericSearchException(e.getClass().getName()+": "+e.toString());
+            } catch (IOException e) {
                 throw new GenericSearchException(e.getClass().getName()+": "+e.toString());
+            } finally {
+                if (inStr != null) {
+                    try {
+                        inStr.close();
+                    } catch (IOException e) {}
+                }
+                if (out != null) {
+                    try {
+                        out.close();
+                    } catch (IOException e) {}
+                }
             }
         }
         if (ds != null) {
@@ -419,12 +557,19 @@ public class GenericOperationsImpl implements Operations {
             String repositoryName,
             String dsMimetypes)
     throws GenericSearchException {
+//    	return getFirstDatastreamText(pid, repositoryName, dsMimetypes,
+//            		config.getFedoraSoap(repositoryName), 
+//            		config.getFedoraUser(repositoryName), 
+//            		config.getFedoraPass(repositoryName), 
+//            		config.getTrustStorePath(repositoryName), 
+//            		config.getTrustStorePass(repositoryName));
+    	//MIH: REST
     	return getFirstDatastreamText(pid, repositoryName, dsMimetypes,
-            		config.getFedoraSoap(repositoryName), 
-            		config.getFedoraUser(repositoryName), 
-            		config.getFedoraPass(repositoryName), 
-            		config.getTrustStorePath(repositoryName), 
-            		config.getTrustStorePass(repositoryName));
+        		config.getFedoraRest(repositoryName), 
+        		config.getFedoraUser(repositoryName), 
+        		config.getFedoraPass(repositoryName), 
+        		config.getTrustStorePath(repositoryName), 
+        		config.getTrustStorePass(repositoryName));
     }
     
     public StringBuffer getFirstDatastreamText(
@@ -447,55 +592,110 @@ public class GenericOperationsImpl implements Operations {
             		+" trustStorePath="+trustStorePath
             		+" trustStorePass="+trustStorePass);
         StringBuffer dsBuffer = new StringBuffer();
-        Datastream[] dsds = null;
+//        Datastream[] dsds = null;
+//        try {
+//            FedoraAPIM apim = getAPIM(
+//            		repositoryName, 
+//            		fedoraSoap, 
+//            		fedoraUser,
+//            		fedoraPass,
+//            		trustStorePath,
+//            		trustStorePass );
+//            dsds = apim.getDatastreams(pid, null, "A");
+//        } catch (AxisFault e) {
+//            throw new GenericSearchException(e.getClass().getName()+": "+e.toString());
+//        } catch (RemoteException e) {
+//            throw new GenericSearchException(e.getClass().getName()+": "+e.toString());
+//        }
+        //MIH: REST
+        List<DatastreamType> datastreams = null;
         try {
-            FedoraAPIM apim = getAPIM(
+        	com.yourmediashelf.fedora.client.FedoraClient restClient = 
+        		getRestFedoraClient(
             		repositoryName, 
             		fedoraSoap, 
             		fedoraUser,
-            		fedoraPass,
-            		trustStorePath,
-            		trustStorePass );
-            dsds = apim.getDatastreams(pid, null, "A");
-        } catch (AxisFault e) {
-            throw new GenericSearchException(e.getClass().getName()+": "+e.toString());
-        } catch (RemoteException e) {
+            		fedoraPass );
+        	ListDatastreamsResponse response = listDatastreams(pid).execute(restClient);
+            datastreams = response.getDatastreams();
+        } catch (FedoraClientException e) {
+        	throw new FedoraObjectNotFoundException("Fedora Object "+pid+" not found at "+repositoryName, e);
+        } catch (IOException e) {
             throw new GenericSearchException(e.getClass().getName()+": "+e.toString());
         }
-//      String mimetypes = "text/plain text/html application/pdf application/ps application/msword";
         String mimetypes = config.getMimeTypes();
         if (dsMimetypes!=null && dsMimetypes.length()>0)
             mimetypes = dsMimetypes;
         String mimetype = "";
         dsID = null;
-        if (dsds != null) {
+        if (datastreams != null && datastreams.size() > 0) {
             int best = 99999;
-            for (int i = 0; i < dsds.length; i++) {
-                int j = mimetypes.indexOf(dsds[i].getMIMEType());
+            for (DatastreamType d : datastreams) {
+                int j = mimetypes.indexOf(d.getMimeType());
                 if (j > -1 && best > j) {
-                    dsID = dsds[i].getID();
+                    dsID = d.getDsid();
                     best = j;
-                    mimetype = dsds[i].getMIMEType();
+                    mimetype = d.getMimeType();
                 }
             }
         }
         ds = null;
         if (dsID != null) {
+//            try {
+//                FedoraAPIA apia = getAPIA(
+//                		repositoryName, 
+//                		fedoraSoap, 
+//                		fedoraUser,
+//                		fedoraPass,
+//                		trustStorePath,
+//                		trustStorePass );
+//                MIMETypedStream mts = apia.getDatastreamDissemination(pid, 
+//                        dsID, null);
+//                ds = mts.getStream();
+//            } catch (AxisFault e) {
+//                throw new GenericSearchException(e.getClass().getName()+": "+e.toString());
+//            } catch (RemoteException e) {
+//                throw new GenericSearchException(e.getClass().getName()+": "+e.toString());
+//            }
+        	//MIH: REST
+            InputStream inStr = null;
+            ByteArrayOutputStream out = null;
             try {
-                FedoraAPIA apia = getAPIA(
+            	com.yourmediashelf.fedora.client.FedoraClient restClient = 
+            		getRestFedoraClient(
                 		repositoryName, 
                 		fedoraSoap, 
                 		fedoraUser,
-                		fedoraPass,
-                		trustStorePath,
-                		trustStorePass );
-                MIMETypedStream mts = apia.getDatastreamDissemination(pid, 
-                        dsID, null);
-                ds = mts.getStream();
-            } catch (AxisFault e) {
+                		fedoraPass );
+            	FedoraResponse response = getDatastreamDissemination(pid, dsID).execute(restClient);
+                inStr = response.getEntityInputStream();
+                out = new ByteArrayOutputStream();
+                if (inStr != null) {
+                    byte[] bytes = new byte[0xFFFF];
+                    int i = -1;
+                    while ((i = inStr.read(bytes)) > -1) {
+                        out.write(bytes, 0, i);
+                    }
+                    out.flush();
+                    ds = out.toByteArray();
+                }
+                mimetype = response.getMimeType();
+
+            } catch (FedoraClientException e) {
                 throw new GenericSearchException(e.getClass().getName()+": "+e.toString());
-            } catch (RemoteException e) {
+            } catch (IOException e) {
                 throw new GenericSearchException(e.getClass().getName()+": "+e.toString());
+            } finally {
+                if (inStr != null) {
+                    try {
+                        inStr.close();
+                    } catch (IOException e) {}
+                }
+                if (out != null) {
+                    try {
+                        out.close();
+                    } catch (IOException e) {}
+                }
             }
         }
         if (ds != null) {
@@ -518,12 +718,19 @@ public class GenericOperationsImpl implements Operations {
             String parameters, 
             String asOfDateTime)
     throws GenericSearchException {
+//    	return getDisseminationText(pid, repositoryName, bDefPid, methodName, parameters, asOfDateTime,
+//                		config.getFedoraSoap(repositoryName), 
+//                		config.getFedoraUser(repositoryName), 
+//                		config.getFedoraPass(repositoryName), 
+//                		config.getTrustStorePath(repositoryName), 
+//                		config.getTrustStorePass(repositoryName) );
+    	//MIH: REST
     	return getDisseminationText(pid, repositoryName, bDefPid, methodName, parameters, asOfDateTime,
-                		config.getFedoraSoap(repositoryName), 
-                		config.getFedoraUser(repositoryName), 
-                		config.getFedoraPass(repositoryName), 
-                		config.getTrustStorePath(repositoryName), 
-                		config.getTrustStorePass(repositoryName) );
+        		config.getFedoraRest(repositoryName), 
+        		config.getFedoraUser(repositoryName), 
+        		config.getFedoraPass(repositoryName), 
+        		config.getTrustStorePath(repositoryName), 
+        		config.getTrustStorePass(repositoryName) );
     }
     
     public StringBuffer getDisseminationText(
@@ -565,36 +772,89 @@ public class GenericOperationsImpl implements Operations {
         String mimetype = "";
         ds = null;
         if (pid != null) {
+//            try {
+//                FedoraAPIA apia = getAPIA(
+//                		repositoryName, 
+//                		fedoraSoap, 
+//                		fedoraUser,
+//                		fedoraPass,
+//                		trustStorePath,
+//                		trustStorePass );
+//                MIMETypedStream mts = apia.getDissemination(pid, bDefPid, 
+//                        methodName, params, asOfDateTime);
+//                if (mts==null) {
+//                    throw new GenericSearchException("getDissemination returned null");
+//                }
+//                ds = mts.getStream();
+//                mimetype = mts.getMIMEType();
+//                if (logger.isDebugEnabled())
+//                    logger.debug("getDisseminationText" +
+//                            " mimetype="+mimetype);
+//            } catch (GenericSearchException e) {
+//                if (e.toString().indexOf("DisseminatorNotFoundException")>-1)
+//                    return new StringBuffer();
+//                else
+//                    throw new GenericSearchException(e.toString());
+//            } catch (AxisFault e) {
+//                if (e.getFaultString().indexOf("DisseminatorNotFoundException")>-1)
+//                    return new StringBuffer();
+//                else
+//                    throw new GenericSearchException(e.getFaultString()+": "+e.toString());
+//            } catch (RemoteException e) {
+//                throw new GenericSearchException(e.getClass().getName()+": "+e.toString());
+//            }
+        	//MIH: REST
+            InputStream inStr = null;
+            ByteArrayOutputStream out = null;
             try {
-                FedoraAPIA apia = getAPIA(
+            	com.yourmediashelf.fedora.client.FedoraClient restClient = 
+            		getRestFedoraClient(
                 		repositoryName, 
                 		fedoraSoap, 
                 		fedoraUser,
-                		fedoraPass,
-                		trustStorePath,
-                		trustStorePass );
-                MIMETypedStream mts = apia.getDissemination(pid, bDefPid, 
-                        methodName, params, asOfDateTime);
-                if (mts==null) {
-                    throw new GenericSearchException("getDissemination returned null");
+                		fedoraPass );
+            	GetDissemination getDissemination = 
+            	    getDissemination(pid, bDefPid, methodName);
+            	for (fedora.server.types.gen.Property property : params) {
+            	    getDissemination.methodParam(
+            	        property.getName(), property.getValue());
+            	}
+            	FedoraResponse response = getDissemination.execute(restClient);
+                inStr = response.getEntityInputStream();
+                out = new ByteArrayOutputStream();
+                if (inStr != null) {
+                    byte[] bytes = new byte[0xFFFF];
+                    int i = -1;
+                    while ((i = inStr.read(bytes)) > -1) {
+                        out.write(bytes, 0, i);
+                    }
+                    out.flush();
+                    ds = out.toByteArray();
                 }
-                ds = mts.getStream();
-                mimetype = mts.getMIMEType();
-                if (logger.isDebugEnabled())
-                    logger.debug("getDisseminationText" +
-                            " mimetype="+mimetype);
-            } catch (GenericSearchException e) {
-                if (e.toString().indexOf("DisseminatorNotFoundException")>-1)
-                    return new StringBuffer();
-                else
-                    throw new GenericSearchException(e.toString());
-            } catch (AxisFault e) {
-                if (e.getFaultString().indexOf("DisseminatorNotFoundException")>-1)
-                    return new StringBuffer();
-                else
-                    throw new GenericSearchException(e.getFaultString()+": "+e.toString());
-            } catch (RemoteException e) {
+                mimetype = response.getMimeType();
+              if (logger.isDebugEnabled())
+              logger.debug("getDisseminationText" +
+                      " mimetype="+mimetype);
+
+            } catch (FedoraClientException e) {
+				if (e.toString().indexOf("DisseminatorNotFoundException") > -1) {
+					return new StringBuffer();
+				} else {
+					throw new GenericSearchException(e.toString());
+				}
+            } catch (IOException e) {
                 throw new GenericSearchException(e.getClass().getName()+": "+e.toString());
+            } finally {
+                if (inStr != null) {
+                    try {
+                        inStr.close();
+                    } catch (IOException e) {}
+                }
+                if (out != null) {
+                    try {
+                        out.close();
+                    } catch (IOException e) {}
+                }
             }
         }
         if (ds != null) {

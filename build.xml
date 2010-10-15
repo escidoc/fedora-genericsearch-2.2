@@ -185,6 +185,9 @@
 		<delete file="${build.dir}/WEB-INF/web.xml" />
 		<copy file="src/WEB-INF/web-withoutAuthN.xml" tofile="${build.dir}/WEB-INF/web.xml" />
 		<copy file="lib/axis-1.4.jar" tofile="${build.dir}/WEB-INF/lib/axis-1.4.jar" />
+		<copy file="lib/fedora-client-3.2.1.jar" tofile="${build.dir}/WEB-INF/lib/fedora-client-3.2.1.jar" />
+		<copy file="lib/fedora-messaging-client-3.1.jar" tofile="${build.dir}/WEB-INF/lib/fedora-messaging-client-3.1.jar" />
+		<copy file="lib/fedora-server-3.1.jar" tofile="${build.dir}/WEB-INF/lib/fedora-server-3.1.jar" />
         <copy file="lib/escidoc/common.jar" tofile="${build.dir}/WEB-INF/lib/common.jar" />
 	    <jar jarfile="${dist.dir}/${nolibs.war.name}" basedir="${build.dir}"/>
 		<copy todir="${build.dir}/WEB-INF/lib" flatten="true">

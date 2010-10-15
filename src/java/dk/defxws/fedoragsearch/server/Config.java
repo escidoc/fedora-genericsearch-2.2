@@ -1028,6 +1028,11 @@ public class Config {
         return (getRepositoryProps(repositoryName)).getProperty("fgsrepository.fedoraSoap");
     }
     
+    //MIH: for REST-Access
+    public String getFedoraRest(String repositoryName) {
+        return (getRepositoryProps(repositoryName)).getProperty("fgsrepository.fedoraRest");
+    }
+    
     public String getFedoraUser(String repositoryName) {
         return (getRepositoryProps(repositoryName)).getProperty("fgsrepository.fedoraUser");
     }

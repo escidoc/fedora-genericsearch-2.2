@@ -33,6 +33,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.axis.utils.StringUtils;
+import org.apache.log4j.Logger;
+import org.w3c.dom.NodeList;
 
 /**
  * Is called from sylesheet that transforms foxml to indexable document.
@@ -47,7 +49,9 @@ import org.apache.axis.utils.StringUtils;
  */
 public class StringHelper {
 
-    //äöü
+    private static Logger log;
+
+  //äöü
     private static Pattern pattern = Pattern.compile(
             "([\u00e4\u00f6\u00fc])");
     private static Matcher matcher = pattern.matcher("");
@@ -57,6 +61,31 @@ public class StringHelper {
 
     private static final Matcher MATCHER_ID_WITHOUT_VERSION =
         PATTERN_ID_WITHOUT_VERSION.matcher("");
+
+    static {
+        log =
+            Logger
+                .getLogger(
+                de.escidoc.sb.gsearch.xslt.StringHelper.class);
+    }
+
+  /**
+     * Returns the substring after the last occurence of character.
+     * 
+     * @param term
+     *            term
+     * @param term1
+     *            character
+     * @return String substring of term after last occurence of term1.
+     */
+    public static String getSubstringAfterLast(
+        final String term, final String term1) {
+        if (StringUtils.isEmpty(term) || StringUtils.isEmpty(term1) 
+                || term.lastIndexOf(term1) == -1) {
+            return term;
+        }
+        return term.substring(term.lastIndexOf(term1) + term1.length());
+    }
 
     /**
      * Returns the substring after the last occurence of character.
@@ -68,7 +97,11 @@ public class StringHelper {
      * @return String substring of term after last occurence of term1.
      */
     public static String getSubstringAfterLast(
-        final String term, final String term1) {
+        final NodeList nodeList, final String term1) {
+    	String term = "";
+    	if (nodeList != null && nodeList.getLength() == 1) {
+    		term = nodeList.item(0).getNodeValue();
+    	}
         if (StringUtils.isEmpty(term) || StringUtils.isEmpty(term1) 
                 || term.lastIndexOf(term1) == -1) {
             return term;
