@@ -233,8 +233,8 @@ public class EscidocCoreAccessor {
      * Return count of members. 
      * 
      * @param containerId
-     *            id of content model
-     * @return String content model name
+     *            id of container model
+     * @return String member-count
      */
     public static synchronized String getContainerMemberCount(
                     final String containerId, final String status) {
@@ -248,23 +248,16 @@ public class EscidocCoreAccessor {
         if (log.isDebugEnabled()) {
             log.debug("executing EscidocCoreAccessor, getContainerMemberCount");
         }
-        StringBuffer resourceBuffer = new StringBuffer(
-                    Constants.CONTAINER_ID_MATCHER.reset(
-                            Constants.CONTAINER_MEMBERS_URL)
-                                .replaceFirst(containerObjid));
         try {
             BasicClientCookie cookie = new BasicClientCookie(
                     COOKIE_LOGIN, EscidocConfiguration.getInstance().get(
                     EscidocConfiguration.GSEARCH_PASSWORD));
-            String result = connectionUtility.postRequestURLAsString(
+            String result = connectionUtility.getRequestURLAsString(
                         new URL(EscidocConfiguration.getInstance().get(
-                    EscidocConfiguration.ESCIDOC_CORE_SELFURL) + resourceBuffer.toString()), 
-                        Constants.STATUS_MATCHER.reset(
-                            Constants.CONTAINER_MEMBER_FILTER)
-                            .replaceFirst(status), cookie);
+                    EscidocConfiguration.ESCIDOC_CORE_SELFURL) 
+                    + Constants.CONTAINER_URL + containerObjid), cookie);
 
-            StaxParser sp = new StaxParser(
-                    Constants.CONTAINER_MEMBERS_ROOT_ELEMENT);
+            StaxParser sp = new StaxParser();
             ContainerMembersCountHandler handler = 
                         new ContainerMembersCountHandler(sp);
             sp.addHandler(handler);
@@ -282,250 +275,6 @@ public class EscidocCoreAccessor {
         catch (Exception e) {
             log.error("couldnt retrieve member-list for container " 
                                     + containerObjid);
-            log.error(e);
-        }
-        return "";
-    }
-
-    /**
-     * Calls resource ou (organizational-unit) to get xml-structure with all
-     * parent-ous of given ou. Parses objectids of parent-ous and returns them
-     * whitespace-separated.
-     * 
-     * This call is deprecated. Use Method getObjectAttribute
-     * 
-     * @param ouId
-     *            id of organizational unit
-     * @return String parent-ous whitespace-separated
-     */
-    @Deprecated
-    public static synchronized String getOuParents(
-                                        final String ouId, 
-                                        final String accessAsAnonymousUser) {
-
-        if (ouId == null || ouId.equals("")) {
-        	return "";
-        }
-    	
-    	// ouId may not be trimmed
-        final String ouObjid = ouId.trim();
-
-        if (log.isDebugEnabled()) {
-            log.debug("executing EscidocCoreAccessor, getOuParents");
-        }
-        StringBuffer resourceBuffer = new StringBuffer(Constants.ORG_UNIT_URL);
-        resourceBuffer.append(ouObjid).append(
-        		Constants.ORG_UNIT_PATH_LIST_URL_SUFFIX);
-        BasicClientCookie cookie = null;
-        try {
-            if (accessAsAnonymousUser == null 
-                    || !accessAsAnonymousUser.equals("true")) {
-                cookie = new BasicClientCookie(
-                        COOKIE_LOGIN, EscidocConfiguration.getInstance().get(
-                        EscidocConfiguration.GSEARCH_PASSWORD));
-            }
-            String result = connectionUtility.getRequestURLAsString(
-                    new URL(EscidocConfiguration.getInstance().get(
-                EscidocConfiguration.ESCIDOC_CORE_SELFURL) 
-                        + resourceBuffer.toString()), cookie);
-            
-			StaxParser sp = new StaxParser(
-					Constants.ORG_UNIT_PATH_LIST_ROOT_ELEMENT);
-	        OuHrefHandler handler = new OuHrefHandler(sp);
-	        sp.addHandler(handler);
-
-	        try {
-	            sp.parse(new ByteArrayInputStream(result.getBytes(
-	            				Constants.XML_CHARACTER_ENCODING)));
-	        }
-	        catch (Exception e) {
-	            e.printStackTrace();
-	        }
-
-	        Vector<String> hrefs = handler.getHrefs();
-            StringBuffer pidBuf = new StringBuffer("");
-	        Matcher lastSlashMatcher = 
-	        	Constants.LAST_SLASH_PATTERN.matcher("");
-	        for (String href : hrefs) {
-	        	lastSlashMatcher.reset(href);
-	        	if (lastSlashMatcher.reset(href).matches()) {
-	        		pidBuf.append(lastSlashMatcher.group(1)).append(" ");
-	        	}
-	        }
-            return pidBuf.toString();
-        }
-        catch (Exception e) {
-            log.error("organizational unit " + ouObjid + " not found");
-            log.error(e);
-        }
-        return "";
-    }
-
-    /**
-     * Calls resource cmm (content-model-manager) 
-     * to get the content-model-name 
-     * specified by cmId.
-     * 
-     * This call is deprecated. Use Method getObjectAttribute
-     * 
-     * @param cmId
-     *            id of content model
-     * @return String content model name
-     */
-    @Deprecated
-    public static synchronized String getContentModelName(final String cmId) {
-
-        if (cmId == null || cmId.equals("")) {
-        	return "";
-        }
-    	
-         final String cmObjid = cmId.trim();
-
-        if (log.isDebugEnabled()) {
-            log.debug("executing EscidocCoreAccessor, getContentModelName");
-        }
-        StringBuffer resourceBuffer = new StringBuffer(Constants.CONTENT_MODEL_URL);
-        resourceBuffer.append(cmObjid);
-        try {
-            BasicClientCookie cookie = new BasicClientCookie(
-                    COOKIE_LOGIN, EscidocConfiguration.getInstance().get(
-                    EscidocConfiguration.GSEARCH_PASSWORD));
-            String result = connectionUtility.getRequestURLAsString(
-                    new URL(EscidocConfiguration.getInstance().get(
-                EscidocConfiguration.ESCIDOC_CORE_SELFURL) 
-                        + resourceBuffer.toString()), cookie);
-
-            StaxParser sp = new StaxParser(
-					Constants.CONTENT_MODEL_ROOT_ELEMENT);
-	        ContentModelNameHandler handler = new ContentModelNameHandler(sp);
-	        sp.addHandler(handler);
-
-	        try {
-	            sp.parse(new ByteArrayInputStream(result.getBytes(
-	            				Constants.XML_CHARACTER_ENCODING)));
-	        }
-	        catch (Exception e) {
-	            e.printStackTrace();
-	        }
-
-	        return handler.getContentModelName();
-        }
-        catch (Exception e) {
-            log.error("content model " + cmObjid + " not found");
-            log.error(e);
-        }
-        return "";
-    }
-
-    /**
-     * Calls resource om (object-manager) 
-     * to get the context-name 
-     * specified by cId.
-     * 
-     * This call is deprecated. Use Method getObjectAttribute
-     * 
-     * @param cId
-     *            id of context
-     * @return String context name
-     */
-    @Deprecated
-    public static synchronized String getContextName(final String cId) {
-
-        if (cId == null || cId.equals("")) {
-        	return "";
-        }
-    	
-         final String cObjid = cId.trim();
-
-        if (log.isDebugEnabled()) {
-            log.debug("executing EscidocCoreAccessor, getContextName");
-        }
-        StringBuffer resourceBuffer = new StringBuffer(
-        		Constants.CONTEXT_ID_MATCHER.reset(
-                		Constants.CONTEXT_PROPERTIES_URL)
-        				.replaceFirst(cObjid));
-        try {
-            BasicClientCookie cookie = new BasicClientCookie(
-                    COOKIE_LOGIN, EscidocConfiguration.getInstance().get(
-                    EscidocConfiguration.GSEARCH_PASSWORD));
-            String result = connectionUtility.getRequestURLAsString(
-                    new URL(EscidocConfiguration.getInstance().get(
-                EscidocConfiguration.ESCIDOC_CORE_SELFURL) 
-                        + resourceBuffer.toString()), cookie);
-
-            StaxParser sp = new StaxParser(
-					Constants.CONTEXT_PROPERTIES_ROOT_ELEMENT);
-	        ContextNameHandler handler = new ContextNameHandler(sp);
-	        sp.addHandler(handler);
-
-	        try {
-	            sp.parse(new ByteArrayInputStream(result.getBytes(
-	            				Constants.XML_CHARACTER_ENCODING)));
-	        }
-	        catch (Exception e) {
-	            e.printStackTrace();
-	        }
-
-	        return handler.getContextName();
-        }
-        catch (Exception e) {
-            log.error("context " + cObjid + " not found");
-            log.error(e);
-        }
-        return "";
-    }
-
-    /**
-     * Calls resource aa 
-     * to get the user-name 
-     * specified by uId.
-     * 
-     * This call is deprecated. Use Method getObjectAttribute
-     * 
-     * @param uId
-     *            id of user
-     * @return String user name
-     */
-    @Deprecated
-    public static synchronized String getUserName(final String uId) {
-
-        if (uId == null || uId.equals("")) {
-        	return "";
-        }
-    	
-         final String uObjid = uId.trim();
-
-        if (log.isDebugEnabled()) {
-            log.debug("executing EscidocCoreAccessor, getUserName");
-        }
-        StringBuffer resourceBuffer = new StringBuffer(Constants.USER_ACCOUNT_URL);
-        resourceBuffer.append(uObjid);
-        try {
-            BasicClientCookie cookie = new BasicClientCookie(
-                    COOKIE_LOGIN, EscidocConfiguration.getInstance().get(
-                    EscidocConfiguration.GSEARCH_PASSWORD));
-            String result = connectionUtility.getRequestURLAsString(
-                    new URL(EscidocConfiguration.getInstance().get(
-                EscidocConfiguration.ESCIDOC_CORE_SELFURL) 
-                        + resourceBuffer.toString()), cookie);
-
-            StaxParser sp = new StaxParser(
-					Constants.USER_ACCOUNT_ROOT_ELEMENT);
-	        UserNameHandler handler = new UserNameHandler(sp);
-	        sp.addHandler(handler);
-
-	        try {
-	            sp.parse(new ByteArrayInputStream(result.getBytes(
-	            				Constants.XML_CHARACTER_ENCODING)));
-	        }
-	        catch (Exception e) {
-	            e.printStackTrace();
-	        }
-
-	        return handler.getUserName();
-        }
-        catch (Exception e) {
-            log.error("context " + uObjid + " not found");
             log.error(e);
         }
         return "";

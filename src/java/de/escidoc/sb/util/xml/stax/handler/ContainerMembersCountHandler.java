@@ -34,13 +34,14 @@ import de.escidoc.core.common.util.xml.stax.handler.DefaultHandler;
 
 
 public class ContainerMembersCountHandler extends DefaultHandler {
-    public static final String XLINK_PREFIX = "xlink";
 
-    public static final String XLINK_URI = "http://www.w3.org/1999/xlink";
+	private static final String itemPath = "/container/struct-map/item";
+    
+    private static final String containerPath = "/container/struct-map/container";
 
-    protected StaxParser parser;
+    private StaxParser parser;
 
-    protected int membersCount = 0;
+    private int membersCount = 0;
 
     /*
      * 
@@ -51,8 +52,6 @@ public class ContainerMembersCountHandler extends DefaultHandler {
 
     public StartElement startElement(StartElement element) {
 
-        String itemPath = "/member-list/item";
-        String containerPath = "/member-list/container";
         String currentPath = parser.getCurPath();
 
         if (itemPath.equals(currentPath) 
