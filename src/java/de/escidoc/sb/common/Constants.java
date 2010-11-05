@@ -68,27 +68,11 @@ public class Constants {
 
     public static final String CONTAINER_URL = "/ir/container/";
 
-    public static final String CONTAINER_MEMBERS_URL = 
-    			"/ir/container/${CONTAINER_ID}/members/filter";
-
-    public static final String CONTAINER_MEMBERS_ROOT_ELEMENT = "member-list";
-
     public static final Pattern LAST_SLASH_PATTERN = Pattern.compile(".*/(.*)");
 
     public static final Pattern CONTAINER_ID_PATTERN = 
     				Pattern.compile("\\$\\{CONTAINER_ID\\}");
 
     public static Matcher CONTAINER_ID_MATCHER = CONTAINER_ID_PATTERN.matcher("");
-
-    public static final String CONTAINER_MEMBER_FILTER = 
-    				"<param><filter " +
-    				"name=\"http://escidoc.de/core/01/properties/public-status\">" +
-    				"${STATUS}" +
-    				"</filter><limit>0</limit></param>";
-
-    public static final Pattern STATUS_PATTERN = 
-		Pattern.compile("\\$\\{STATUS\\}");
-
-    public static Matcher STATUS_MATCHER = STATUS_PATTERN.matcher("");
 
 }
