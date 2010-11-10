@@ -34,6 +34,7 @@ import java.net.URL;
 import java.util.Vector;
 import java.util.regex.Matcher;
 
+import javax.naming.AuthenticationException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -218,6 +219,12 @@ public class EscidocCoreAccessor {
             }
             String response = connectionUtility.getRequestURLAsString(
                     new URL(domain + restUri), cookie);
+            if (response.matches("(?s).*j_spring_security_check.*")) {
+            	throw new AuthenticationException("User with handle " 
+            			+ EscidocConfiguration.getInstance().get(
+                        EscidocConfiguration.GSEARCH_PASSWORD) 
+                        + " not allowed to retrieve " + restUri);
+            }
             return response;
         }
         catch (Exception e) {
