@@ -31,6 +31,9 @@ import org.pdfbox.pdfparser.PDFParser;
 import org.pdfbox.pdmodel.PDDocument;
 import org.pdfbox.util.PDFTextStripper;
 
+import com.itextpdf.text.pdf.PdfReader;
+import com.itextpdf.text.pdf.parser.PdfTextExtractor;
+
 import dk.defxws.fedoragsearch.server.errors.GenericSearchException;
 
 /**
@@ -269,8 +272,6 @@ throws GenericSearchException {
         try {
             PDFTextStripper stripper = new PDFTextStripper();
             docText = new StringBuffer(stripper.getText(new PDDocument(cosDoc)));
-            // check if output is gibberish, if so , throw Exception.
-            checkGibberish(docText);
         } catch (Throwable e) {
             closeCOSDocument(cosDoc);
             if (errorFlag) {
@@ -290,11 +291,11 @@ throws GenericSearchException {
             Config.getCurrentConfig().getIgnoreTextExtractionErrors());
         try {
             docText.append(" ");
-//            PdfReader reader = new PdfReader(inputFile);
-//            for (int i = 1; i <= reader.getNumberOfPages(); i++) {
-//                docText.append(PdfTextExtractor.getTextFromPage(reader, i)).append(" ");
-//            }
-        } catch (Exception e) {
+            PdfReader reader = new PdfReader(doc);
+            for (int i = 1; i <= reader.getNumberOfPages(); i++) {
+                docText.append(PdfTextExtractor.getTextFromPage(reader, i)).append(" ");
+            }
+        } catch (Throwable e) {
             if (errorFlag) {
                 return new StringBuffer("textfrompdffilenotextractable");
             } else {
@@ -392,7 +393,7 @@ throws GenericSearchException {
                 textBuffer.append(str).append(" ");
             }
             fileIn.close();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             if (errorFlag) {
                 return new StringBuffer("textfrompdffilenotextractable");
             } else {
