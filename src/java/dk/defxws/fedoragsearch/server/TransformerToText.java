@@ -31,9 +31,6 @@ import org.pdfbox.pdfparser.PDFParser;
 import org.pdfbox.pdmodel.PDDocument;
 import org.pdfbox.util.PDFTextStripper;
 
-import com.itextpdf.text.pdf.PdfReader;
-import com.itextpdf.text.pdf.parser.PdfTextExtractor;
-
 import dk.defxws.fedoragsearch.server.errors.GenericSearchException;
 
 /**
@@ -290,11 +287,12 @@ throws GenericSearchException {
         boolean errorFlag = Boolean.parseBoolean(
             Config.getCurrentConfig().getIgnoreTextExtractionErrors());
         try {
-            docText.append(" ");
-            PdfReader reader = new PdfReader(doc);
-            for (int i = 1; i <= reader.getNumberOfPages(); i++) {
-                docText.append(PdfTextExtractor.getTextFromPage(reader, i)).append(" ");
-            }
+//            docText.append(" ");
+//            PdfReader reader = new PdfReader(doc);
+//            for (int i = 1; i <= reader.getNumberOfPages(); i++) {
+//                docText.append(PdfTextExtractor.getTextFromPage(reader, i)).append(" ");
+//            }
+        	docText.append(" ");
         } catch (Throwable e) {
             if (errorFlag) {
                 return new StringBuffer("textfrompdffilenotextractable");
