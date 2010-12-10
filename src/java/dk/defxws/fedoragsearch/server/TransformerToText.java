@@ -186,6 +186,37 @@ throws GenericSearchException {
      */
     private StringBuffer getTextFromPDF(byte[] doc)
             throws GenericSearchException {
+        String textExtractorCommand = Config.getCurrentConfig().getPdfTextExtractorCommand();
+        if (textExtractorCommand == null || textExtractorCommand.equals("")) {
+            return getTextFromPDFWithPdfBox(doc);
+        } 
+        else if (textExtractorCommand.equals("iText")) {
+            return getTextFromPDFWithItext(doc);
+        }
+        else {
+            return getTextFromPDFWithExternalTool(doc);
+        }
+    }
+    
+    private static COSDocument parseDocument(InputStream is)
+    throws IOException {
+        PDFParser parser = new PDFParser(is);
+        parser.parse();
+        return parser.getDocument();
+    }
+    
+    private void closeCOSDocument(COSDocument cosDoc) {
+        if (cosDoc != null) {
+            try {
+                cosDoc.close();
+            }
+            catch (IOException e) {
+            }
+        }
+    }
+    
+    private StringBuffer getTextFromPDFWithPdfBox(byte[] doc)
+    throws GenericSearchException  {
         StringBuffer docText = new StringBuffer();
         COSDocument cosDoc = null;
         String password = "";
@@ -242,42 +273,41 @@ throws GenericSearchException {
             checkGibberish(docText);
         } catch (Throwable e) {
             closeCOSDocument(cosDoc);
-            // MIH: comment this out because PDFBox sometimes doesnt work
-            // correctly
-            // try with external tool
-            try {
-                docText = getTextFromPDFWithExternalTool(doc);
-            } catch (Exception e1) {
-                if (errorFlag) {
-                    return new StringBuffer("textfrompdffilenotextractable");
-                } else {
-                    throw new GenericSearchException(
-                            "Cannot parse PDF document", e1);
-                }
+            if (errorFlag) {
+                return new StringBuffer("textfrompdffilenotextractable");
+            } else {
+                throw new GenericSearchException(
+                        "Cannot parse PDF document", e);
             }
         }
         closeCOSDocument(cosDoc);
         return docText;
     }
-    
-    private static COSDocument parseDocument(InputStream is)
-    throws IOException {
-        PDFParser parser = new PDFParser(is);
-        parser.parse();
-        return parser.getDocument();
-    }
-    
-    private void closeCOSDocument(COSDocument cosDoc) {
-        if (cosDoc != null) {
-            try {
-                cosDoc.close();
-            }
-            catch (IOException e) {
+
+    private StringBuffer getTextFromPDFWithItext(byte[] doc) throws GenericSearchException {
+        StringBuffer docText = new StringBuffer();
+        boolean errorFlag = Boolean.parseBoolean(
+            Config.getCurrentConfig().getIgnoreTextExtractionErrors());
+        try {
+            docText.append(" ");
+//            PdfReader reader = new PdfReader(inputFile);
+//            for (int i = 1; i <= reader.getNumberOfPages(); i++) {
+//                docText.append(PdfTextExtractor.getTextFromPage(reader, i)).append(" ");
+//            }
+        } catch (Exception e) {
+            if (errorFlag) {
+                return new StringBuffer("textfrompdffilenotextractable");
+            } else {
+                throw new GenericSearchException(
+                        "Cannot parse PDF document", e);
             }
         }
+        return docText;
     }
-    
-    private StringBuffer getTextFromPDFWithExternalTool(byte[] doc) throws Exception {
+
+    private StringBuffer getTextFromPDFWithExternalTool(byte[] doc) throws GenericSearchException {
+        boolean errorFlag = Boolean.parseBoolean(
+            Config.getCurrentConfig().getIgnoreTextExtractionErrors());
         StringBuffer textBuffer = new StringBuffer("");
         
         String inputFileName = null;
@@ -362,6 +392,13 @@ throws GenericSearchException {
                 textBuffer.append(str).append(" ");
             }
             fileIn.close();
+        } catch (Exception e) {
+            if (errorFlag) {
+                return new StringBuffer("textfrompdffilenotextractable");
+            } else {
+                throw new GenericSearchException(
+                        "Cannot parse PDF document", e);
+            }
         } finally {
             //close Streams
             if (fop != null) {
