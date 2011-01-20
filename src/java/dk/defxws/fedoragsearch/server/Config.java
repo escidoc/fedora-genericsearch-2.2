@@ -69,7 +69,18 @@ public class Config {
     
     private static Hashtable configs = new Hashtable();
     
-    private static boolean wsddDeployed = false;
+    //MIH: store resources retrieved from an url////////////////
+    private Hashtable<String, byte[]> urlResources = 
+    					new Hashtable<String, byte[]>();
+    
+    public void setUrlResources(Hashtable<String, byte[]> urlResources) {
+    	synchronized(this.urlResources) {
+    		this.urlResources = urlResources;
+    	}
+	}
+    ////////////////////////////////////////////////////////////
+
+	private static boolean wsddDeployed = false;
     
     private String configName = null;
     
@@ -827,8 +838,22 @@ public class Config {
         }
     }
     
-    //MIH: added to retrieve stylesheet from url
+    //MIH: added to retrieve stylesheet from url///////////////////////////////////
     public InputStream getResourceFromUrl(String url) throws ConfigException {
+    	if (!new Boolean(fgsProps.getProperty("fedoragsearch.cacheUrlResources"))) {
+    		return new ByteArrayInputStream(httpRetrieve(url));
+    	}
+    	byte[] resource = (byte[])urlResources.get(url);
+    	if (resource == null) {
+    		resource = httpRetrieve(url);
+    		synchronized(urlResources) {
+    			urlResources.put(url, resource);
+    		}
+    	}
+    	return new ByteArrayInputStream(resource);
+    }
+    
+    private byte[] httpRetrieve(final String url) throws ConfigException {
         byte[] stylesheetBytes = null;
         try {
             HttpClient httpClient = new HttpClient();
@@ -883,8 +908,9 @@ public class Config {
             //MIH: added for URLDecoding
             throw new ConfigException("get stylesheet from url "+url+":\n", e);
         }
-        return new ByteArrayInputStream(stylesheetBytes);
+        return stylesheetBytes;
     }
+    ///////////////////////////////////////////////////////////////////////////////
     
     public String getConfigName() {
         return configName;

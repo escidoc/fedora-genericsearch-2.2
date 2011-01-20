@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.Date;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Properties;
 
@@ -54,6 +55,8 @@ public class RESTImpl extends HttpServlet {
     private static final String OP_GETINDEXINFO = "getIndexInfo";
     private static final String OP_UPDATEINDEX = "updateIndex";
     private static final String OP_BROWSEINDEX = "browseIndex";
+    //MIH: added
+    private static final String OP_FLUSHURLRESOURCES = "flushUrlResources";
     private static final String PARAM_CONFIGNAME = "configName";
     private static final String PARAM_OPERATION = "operation";
     private static final String PARAM_QUERY = "query";
@@ -114,6 +117,9 @@ public class RESTImpl extends HttpServlet {
                 resultXml = new StringBuffer(updateIndex(request, response));
             } else if (OP_BROWSEINDEX.equals(operation)) {
                 resultXml = new StringBuffer(browseIndex(request, response));
+            //MIH: added    
+            } else if (OP_FLUSHURLRESOURCES.equals(operation)) {
+                resultXml = new StringBuffer(flushUrlResources(request, response));
             } else if ("configure".equals(operation)) {
                 resultXml = new StringBuffer(configure(request, response));
             } else if ("getIndexConfigInfo".equals(operation)) {
@@ -246,6 +252,16 @@ public class RESTImpl extends HttpServlet {
         Operations ops = config.getOperationsImpl(indexName);
         String result = ops.getIndexInfo(indexName, resultPageXslt);
         return result;
+    }
+    
+    //MIH: flush stored url-resources
+    private String flushUrlResources(HttpServletRequest request, HttpServletResponse response)
+    throws java.rmi.RemoteException {
+        if (restXslt==null || restXslt.equals("")) {
+            restXslt = config.getDefaultGetIndexInfoRestXslt();
+        }
+    	config.setUrlResources(new Hashtable<String, byte[]>());
+    	return "<resultPage><flushUrlResources>OK</flushUrlResources></resultPage>";
     }
     
     public String updateIndex(HttpServletRequest request, HttpServletResponse response)
