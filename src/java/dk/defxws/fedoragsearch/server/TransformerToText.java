@@ -227,6 +227,7 @@ throws GenericSearchException {
         } catch (IOException e) {
             closeCOSDocument(cosDoc);
             if (errorFlag) {
+            	logger.warn(e);
                 return new StringBuffer("textfrompdffilenotextractable");
             } else {
                 throw new GenericSearchException("Cannot parse PDF document", e);
@@ -242,6 +243,7 @@ throws GenericSearchException {
         } catch (CryptographyException e) {
             closeCOSDocument(cosDoc);
             if (errorFlag) {
+            	logger.warn(e);
                 return new StringBuffer("textfrompdffilenotextractable");
             } else {
                 throw new GenericSearchException("Cannot decrypt PDF document",
@@ -250,6 +252,7 @@ throws GenericSearchException {
         } catch (InvalidPasswordException e) {
             closeCOSDocument(cosDoc);
             if (errorFlag) {
+            	logger.warn(e);
                 return new StringBuffer("textfrompdffilenotextractable");
             } else {
                 throw new GenericSearchException("Cannot decrypt PDF document",
@@ -258,6 +261,7 @@ throws GenericSearchException {
         } catch (IOException e) {
             closeCOSDocument(cosDoc);
             if (errorFlag) {
+            	logger.warn(e);
                 return new StringBuffer("textfrompdffilenotextractable");
             } else {
                 throw new GenericSearchException("Cannot decrypt PDF document",
@@ -272,6 +276,7 @@ throws GenericSearchException {
         } catch (Throwable e) {
             closeCOSDocument(cosDoc);
             if (errorFlag) {
+            	logger.warn(e);
                 return new StringBuffer("textfrompdffilenotextractable");
             } else {
                 throw new GenericSearchException(
@@ -295,6 +300,7 @@ throws GenericSearchException {
         	docText.append(" ");
         } catch (Throwable e) {
             if (errorFlag) {
+            	logger.warn(e);
                 return new StringBuffer("textfrompdffilenotextractable");
             } else {
                 throw new GenericSearchException(
@@ -393,6 +399,7 @@ throws GenericSearchException {
             fileIn.close();
         } catch (Throwable e) {
             if (errorFlag) {
+            	logger.warn(e);
                 return new StringBuffer("textfrompdffilenotextractable");
             } else {
                 throw new GenericSearchException(
