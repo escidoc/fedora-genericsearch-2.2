@@ -22,14 +22,14 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.apache.log4j.Logger;
 import org.apache.lucene.demo.html.HTMLParser;
+import org.apache.pdfbox.cos.COSDocument;
+import org.apache.pdfbox.encryption.DocumentEncryption;
+import org.apache.pdfbox.exceptions.CryptographyException;
+import org.apache.pdfbox.exceptions.InvalidPasswordException;
+import org.apache.pdfbox.pdfparser.PDFParser;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.util.PDFTextStripper;
 import org.apache.poi.hwpf.extractor.WordExtractor;
-import org.pdfbox.cos.COSDocument;
-import org.pdfbox.encryption.DocumentEncryption;
-import org.pdfbox.exceptions.CryptographyException;
-import org.pdfbox.exceptions.InvalidPasswordException;
-import org.pdfbox.pdfparser.PDFParser;
-import org.pdfbox.pdmodel.PDDocument;
-import org.pdfbox.util.PDFTextStripper;
 
 import dk.defxws.fedoragsearch.server.errors.GenericSearchException;
 
