@@ -660,7 +660,8 @@ public class Config {
     		String defaultQueryFields = props.getProperty("fgsindex.defaultQueryFields");
 
 //  		Use custom URIResolver if given
-    		if (operationsImpl.indexOf("fgslucene")>-1) {
+    		//MIH: also check for solr
+    		if (operationsImpl.indexOf("fgslucene")>-1 || operationsImpl.indexOf("fgssolr")>-1) {
     			Class uriResolverClass = null;
     			String uriResolver = props.getProperty("fgsindex.uriResolver");
     			if (!(uriResolver == null || uriResolver.equals(""))) {
