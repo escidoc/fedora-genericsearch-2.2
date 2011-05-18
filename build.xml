@@ -190,6 +190,9 @@
 		<copy file="lib/fedora-messaging-client-3.1.jar" tofile="${build.dir}/WEB-INF/lib/fedora-messaging-client-3.1.jar" />
 		<copy file="lib/fedora-server-3.1.jar" tofile="${build.dir}/WEB-INF/lib/fedora-server-3.1.jar" />
         <copy file="lib/escidoc/common.jar" tofile="${build.dir}/WEB-INF/lib/common.jar" />
+		<copy todir="${build.dir}/WEB-INF/lib" flatten="true">
+			<fileset dir="lib/fedora-rest-client"/>
+		</copy>
 	    <jar jarfile="${dist.dir}/${nolibs.war.name}" basedir="${build.dir}"/>
 		<copy todir="${build.dir}/WEB-INF/lib" flatten="true">
 			<fileset dir="lib" excludes="servlet-api.jar"/>
