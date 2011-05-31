@@ -59,21 +59,31 @@ public class TransformerToText {
      */
     public StringBuffer getText(byte[] doc, String mimetype)
             throws GenericSearchException {
-        if (mimetype.equals("text/plain")) {
-            return getTextFromText(doc);
-        } else if (mimetype.equals("text/xml")
-                || mimetype.equals("application/xml")) {
-            return getTextFromXML(doc);
-        } else if (mimetype.equals("text/html")) {
-            return getTextFromHTML(doc);
-        } else if (mimetype.equals("application/pdf")) {
-            return getTextFromPDF(doc);
-        } else if (mimetype.equals("application/ps")) {
-            return new StringBuffer();
-        } else if (mimetype.equals("application/msword")) {
-            return getTextFromDOC(doc);
-        } else
-            return new StringBuffer();
+        try {
+            if (mimetype.equals("text/plain")) {
+                return getTextFromText(doc);
+            } else if (mimetype.equals("text/xml")
+                    || mimetype.equals("application/xml")) {
+                return getTextFromXML(doc);
+            } else if (mimetype.equals("text/html")) {
+                return getTextFromHTML(doc);
+            } else if (mimetype.equals("application/pdf")) {
+                return getTextFromPDF(doc);
+            } else if (mimetype.equals("application/ps")) {
+                return new StringBuffer();
+            } else if (mimetype.equals("application/msword")) {
+                return getTextFromDOC(doc);
+            } else
+                return new StringBuffer();
+        } catch (Throwable e) {
+            if (Boolean.parseBoolean(
+                Config.getCurrentConfig().getIgnoreTextExtractionErrors())) {
+                logger.warn(e);
+                return new StringBuffer("textfromfilenotextractable");
+            } else {
+                throw new GenericSearchException(e.toString());
+            }
+        }
     }
 
     /**
