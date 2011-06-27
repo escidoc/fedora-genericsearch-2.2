@@ -164,7 +164,14 @@ public class EscidocCoreAccessor {
     }
 
     /**
-     * Parse xml as Dom-Document
+     * Parse xml as Dom-Document.
+     * Used to fill a xslt-stylesheet-variable with
+     * Example for eSciDoc-xml-content:
+     * <xsl:variable name="FULLTEXT" select="escidoc-core-accessor:getDomDocument('/ir/item/escidoc:124068/components/component/escidoc:124066/content','false')"/>
+     * 	<xsl:for-each select="$FULLTEXT/*[local-name()='test']/*">
+     *      <test><xsl:value-of select="text()"/></test>
+     *  </xsl:for-each>
+     *
      * @param strXml xml as String
      * @return Document Dom-Document
      */
