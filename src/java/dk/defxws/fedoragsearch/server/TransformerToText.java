@@ -8,7 +8,6 @@
 package dk.defxws.fedoragsearch.server;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -57,7 +56,7 @@ public class TransformerToText {
      * @throws TransformerConfigurationException,
      *             TransformerException.
      */
-    public StringBuffer getText(byte[] doc, String mimetype)
+    public StringBuffer getText(InputStream doc, String mimetype)
             throws GenericSearchException {
         try {
             if (mimetype.equals("text/plain")) {
@@ -91,12 +90,12 @@ public class TransformerToText {
      *
      * @throws GenericSearchException.
      */
-    private StringBuffer getTextFromText(byte[] doc) 
+    private StringBuffer getTextFromText(InputStream doc) 
     throws GenericSearchException {
         StringBuffer docText = new StringBuffer();
         InputStreamReader isr = null;
         try {
-            isr = new InputStreamReader(new ByteArrayInputStream(doc), "UTF-8");
+            isr = new InputStreamReader(doc, "UTF-8");
         } catch (UnsupportedEncodingException e) {
             throw new GenericSearchException("encoding exception", e);
         }
@@ -117,11 +116,11 @@ public class TransformerToText {
  *
  * @throws GenericSearchException.
  */
-private StringBuffer getTextFromXML(byte[] doc) 
+private StringBuffer getTextFromXML(InputStream doc) 
 throws GenericSearchException {
     InputStreamReader isr = null;
     try {
-        isr = new InputStreamReader(new ByteArrayInputStream(doc), "UTF-8");
+        isr = new InputStreamReader(doc, "UTF-8");
     } catch (UnsupportedEncodingException e) {
         throw new GenericSearchException("encoding exception", e);
     }
@@ -137,10 +136,10 @@ throws GenericSearchException {
      *
      * @throws GenericSearchException.
      */
-    private StringBuffer getTextFromHTML(byte[] doc) 
+    private StringBuffer getTextFromHTML(InputStream doc) 
     throws GenericSearchException {
         StringBuffer docText = new StringBuffer();
-        HTMLParser htmlParser = new HTMLParser(new ByteArrayInputStream(doc));
+        HTMLParser htmlParser = new HTMLParser(doc);
         try {
             InputStreamReader isr = (InputStreamReader) htmlParser.getReader();
             int c = isr.read();
@@ -159,13 +158,11 @@ throws GenericSearchException {
      * 
      * @throws GenericSearchException.
      */
-    private StringBuffer getTextFromDOC(byte[] doc)
+    private StringBuffer getTextFromDOC(InputStream doc)
             throws GenericSearchException {
-        InputStream in = null;
         WordExtractor wd = null;
         try {
-            in = new ByteArrayInputStream(doc);
-            wd = new WordExtractor(in);
+            wd = new WordExtractor(doc);
             StringBuffer buffer = new StringBuffer(wd.getText().trim());
             for (int c = 0; c < buffer.length(); c++) {
                 if (buffer.charAt(c) <= '\u001F'
@@ -178,13 +175,6 @@ throws GenericSearchException {
         } catch (Exception e) {
             throw new GenericSearchException("Cannot parse Word document", e);
         } finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                }
-                in = null;
-            }
             wd = null;
         }
     }
@@ -194,7 +184,7 @@ throws GenericSearchException {
      * 
      * @throws GenericSearchException.
      */
-    private StringBuffer getTextFromPDF(byte[] doc)
+    private StringBuffer getTextFromPDF(InputStream doc)
             throws GenericSearchException {
         String textExtractorCommand = Config.getCurrentConfig().getPdfTextExtractorCommand();
         if (textExtractorCommand == null || textExtractorCommand.equals("")) {
@@ -225,7 +215,7 @@ throws GenericSearchException {
         }
     }
     
-    private StringBuffer getTextFromPDFWithPdfBox(byte[] doc)
+    private StringBuffer getTextFromPDFWithPdfBox(InputStream doc)
     throws GenericSearchException  {
         StringBuffer docText = new StringBuffer();
         COSDocument cosDoc = null;
@@ -233,7 +223,7 @@ throws GenericSearchException {
         boolean errorFlag = Boolean.parseBoolean(
                 Config.getCurrentConfig().getIgnoreTextExtractionErrors());
         try {
-            cosDoc = parseDocument(new ByteArrayInputStream(doc));
+            cosDoc = parseDocument(doc);
         } catch (IOException e) {
             closeCOSDocument(cosDoc);
             if (errorFlag) {
@@ -297,7 +287,7 @@ throws GenericSearchException {
         return docText;
     }
 
-    private StringBuffer getTextFromPDFWithItext(byte[] doc) throws GenericSearchException {
+    private StringBuffer getTextFromPDFWithItext(InputStream doc) throws GenericSearchException {
         StringBuffer docText = new StringBuffer();
         boolean errorFlag = Boolean.parseBoolean(
             Config.getCurrentConfig().getIgnoreTextExtractionErrors());
@@ -320,7 +310,7 @@ throws GenericSearchException {
         return docText;
     }
 
-    private StringBuffer getTextFromPDFWithExternalTool(byte[] doc) throws GenericSearchException {
+    private StringBuffer getTextFromPDFWithExternalTool(InputStream doc) throws GenericSearchException {
         boolean errorFlag = Boolean.parseBoolean(
             Config.getCurrentConfig().getIgnoreTextExtractionErrors());
         StringBuffer textBuffer = new StringBuffer("");
@@ -347,9 +337,15 @@ throws GenericSearchException {
             //write pdf-bytes to file
             File f = new File(inputFileName);
             fop = new FileOutputStream(f);
-            fop.write(doc);
-            fop.flush();
-            fop.close();
+            if (doc != null) {
+                byte[] bytes = new byte[0xFFFF];
+                int i = -1;
+                while ((i = doc.read(bytes)) > -1) {
+                    fop.write(bytes, 0, i);
+                }
+                fop.flush();
+                fop.close();
+            }
             
             //convert pdf-file to text-file
             String command = Config.getCurrentConfig().getPdfTextExtractorCommand();
@@ -470,29 +466,6 @@ throws GenericSearchException {
         return textBuffer;
     }
     
-    private void closePDDocument(PDDocument pdDoc) {
-        if (pdDoc != null) {
-            try {
-            	pdDoc.close();
-            }
-            catch (IOException e) {
-            }
-        }
-    }
-    private void checkGibberish(final StringBuffer buffer) throws Exception {
-        int j = 0;
-        for (int i = 0; i < buffer.length(); i++) {
-            if (j > 100) {
-                throw new Exception("gibberish");
-            }
-            String hex = charToHex(buffer.charAt(i));
-            int intValue = Integer.parseInt(hex, 16);
-            if (intValue < 9) {
-              j++;
-            }
-        }
-    }
-
     private String byteToHex(byte b) {
         // Returns hex String representation of byte b
         char hexDigit[] = {
@@ -501,13 +474,6 @@ throws GenericSearchException {
         };
         char[] array = { hexDigit[(b >> 4) & 0x0f], hexDigit[b & 0x0f] };
         return new String(array);
-     }
-
-     private String charToHex(char c) {
-        // Returns hex String representation of char c
-        byte hi = (byte) (c >>> 8);
-        byte lo = (byte) (c & 0xff);
-        return byteToHex(hi) + byteToHex(lo);
      }
 
      public static void main(String[] args) {

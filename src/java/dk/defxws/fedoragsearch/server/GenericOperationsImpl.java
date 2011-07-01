@@ -76,7 +76,6 @@ public class GenericOperationsImpl implements Operations {
     
     protected byte[] foxmlRecord;
     protected String dsID;
-    protected byte[] ds;
     protected String dsText;
     protected String[] params = null;
 
@@ -471,7 +470,7 @@ public class GenericOperationsImpl implements Operations {
             		+" trustStorePass="+trustStorePass);
         StringBuffer dsBuffer = new StringBuffer();
         String mimetype = "";
-        ds = null;
+    	FedoraResponse response = null;
         if (dsId != null) {
 //            try {
 //                FedoraAPIA apia = getAPIA(
@@ -496,8 +495,6 @@ public class GenericOperationsImpl implements Operations {
 //                throw new GenericSearchException(e.getClass().getName()+": "+e.toString());
 //            }
         	//MIH: REST
-            InputStream inStr = null;
-            ByteArrayOutputStream out = null;
             try {
             	com.yourmediashelf.fedora.client.FedoraClient restClient = 
             		getRestFedoraClient(
@@ -505,18 +502,7 @@ public class GenericOperationsImpl implements Operations {
                 		fedoraSoap, 
                 		fedoraUser,
                 		fedoraPass );
-            	FedoraResponse response = getDatastreamDissemination(pid, dsId).execute(restClient);
-                inStr = response.getEntityInputStream();
-                out = new ByteArrayOutputStream();
-                if (inStr != null) {
-                    byte[] bytes = new byte[0xFFFF];
-                    int i = -1;
-                    while ((i = inStr.read(bytes)) > -1) {
-                        out.write(bytes, 0, i);
-                    }
-                    out.flush();
-                    ds = out.toByteArray();
-                }
+            	response = getDatastreamDissemination(pid, dsId).execute(restClient);
                 mimetype = response.getMimeType();
 
             } catch (FedoraClientException e) {
@@ -527,21 +513,10 @@ public class GenericOperationsImpl implements Operations {
                     throw new GenericSearchException(e.getClass().getName()+": "+e.toString());
             } catch (IOException e) {
                 throw new GenericSearchException(e.getClass().getName()+": "+e.toString());
-            } finally {
-                if (inStr != null) {
-                    try {
-                        inStr.close();
-                    } catch (IOException e) {}
-                }
-                if (out != null) {
-                    try {
-                        out.close();
-                    } catch (IOException e) {}
-                }
             }
         }
-        if (ds != null) {
-            dsBuffer = (new TransformerToText().getText(ds, mimetype));
+        if (response != null && response.getEntityInputStream() != null) {
+            dsBuffer = (new TransformerToText().getText(response.getEntityInputStream(), mimetype));
         }
         if (logger.isDebugEnabled())
             logger.debug("getDatastreamText" +
@@ -639,7 +614,7 @@ public class GenericOperationsImpl implements Operations {
                 }
             }
         }
-        ds = null;
+    	FedoraResponse response = null;
         if (dsID != null) {
 //            try {
 //                FedoraAPIA apia = getAPIA(
@@ -658,8 +633,6 @@ public class GenericOperationsImpl implements Operations {
 //                throw new GenericSearchException(e.getClass().getName()+": "+e.toString());
 //            }
         	//MIH: REST
-            InputStream inStr = null;
-            ByteArrayOutputStream out = null;
             try {
             	com.yourmediashelf.fedora.client.FedoraClient restClient = 
             		getRestFedoraClient(
@@ -667,39 +640,17 @@ public class GenericOperationsImpl implements Operations {
                 		fedoraSoap, 
                 		fedoraUser,
                 		fedoraPass );
-            	FedoraResponse response = getDatastreamDissemination(pid, dsID).execute(restClient);
-                inStr = response.getEntityInputStream();
-                out = new ByteArrayOutputStream();
-                if (inStr != null) {
-                    byte[] bytes = new byte[0xFFFF];
-                    int i = -1;
-                    while ((i = inStr.read(bytes)) > -1) {
-                        out.write(bytes, 0, i);
-                    }
-                    out.flush();
-                    ds = out.toByteArray();
-                }
+            	response = getDatastreamDissemination(pid, dsID).execute(restClient);
                 mimetype = response.getMimeType();
 
             } catch (FedoraClientException e) {
                 throw new GenericSearchException(e.getClass().getName()+": "+e.toString());
             } catch (IOException e) {
                 throw new GenericSearchException(e.getClass().getName()+": "+e.toString());
-            } finally {
-                if (inStr != null) {
-                    try {
-                        inStr.close();
-                    } catch (IOException e) {}
-                }
-                if (out != null) {
-                    try {
-                        out.close();
-                    } catch (IOException e) {}
-                }
             }
         }
-        if (ds != null) {
-            dsBuffer = (new TransformerToText().getText(ds, mimetype));
+        if (response != null && response.getEntityInputStream() != null) {
+            dsBuffer = (new TransformerToText().getText(response.getEntityInputStream(), mimetype));
         }
         if (logger.isDebugEnabled())
             logger.debug("getFirstDatastreamText" +
@@ -770,7 +721,7 @@ public class GenericOperationsImpl implements Operations {
                     " #parameters="+params.length);
         StringBuffer dsBuffer = new StringBuffer();
         String mimetype = "";
-        ds = null;
+    	FedoraResponse response = null;
         if (pid != null) {
 //            try {
 //                FedoraAPIA apia = getAPIA(
@@ -804,8 +755,6 @@ public class GenericOperationsImpl implements Operations {
 //                throw new GenericSearchException(e.getClass().getName()+": "+e.toString());
 //            }
         	//MIH: REST
-            InputStream inStr = null;
-            ByteArrayOutputStream out = null;
             try {
             	com.yourmediashelf.fedora.client.FedoraClient restClient = 
             		getRestFedoraClient(
@@ -819,18 +768,7 @@ public class GenericOperationsImpl implements Operations {
             	    getDissemination.methodParam(
             	        property.getName(), property.getValue());
             	}
-            	FedoraResponse response = getDissemination.execute(restClient);
-                inStr = response.getEntityInputStream();
-                out = new ByteArrayOutputStream();
-                if (inStr != null) {
-                    byte[] bytes = new byte[0xFFFF];
-                    int i = -1;
-                    while ((i = inStr.read(bytes)) > -1) {
-                        out.write(bytes, 0, i);
-                    }
-                    out.flush();
-                    ds = out.toByteArray();
-                }
+            	response = getDissemination.execute(restClient);
                 mimetype = response.getMimeType();
               if (logger.isDebugEnabled())
               logger.debug("getDisseminationText" +
@@ -844,21 +782,10 @@ public class GenericOperationsImpl implements Operations {
 				}
             } catch (IOException e) {
                 throw new GenericSearchException(e.getClass().getName()+": "+e.toString());
-            } finally {
-                if (inStr != null) {
-                    try {
-                        inStr.close();
-                    } catch (IOException e) {}
-                }
-                if (out != null) {
-                    try {
-                        out.close();
-                    } catch (IOException e) {}
-                }
             }
         }
-        if (ds != null) {
-            dsBuffer = (new TransformerToText().getText(ds, mimetype));
+        if (response != null && response.getEntityInputStream() != null) {
+            dsBuffer = (new TransformerToText().getText(response.getEntityInputStream(), mimetype));
         }
         if (logger.isDebugEnabled())
             logger.debug("getDisseminationText" +
