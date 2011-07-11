@@ -223,11 +223,11 @@ public final class Stream extends OutputStream {
         }
     }
 
-    public void writeCacheTo(final StringBuilder out, final int limit) throws IOException {
+    public void writeCacheTo(final StringBuffer out, final int limit) throws IOException {
         writeCacheTo(out, "UTF-8", limit);
     }
 
-    public void writeCacheTo(final StringBuilder out, final String charsetName, final int limit) throws IOException {
+    public void writeCacheTo(final StringBuffer out, final String charsetName, final int limit) throws IOException {
         flush();
         if(this.totalLength < limit || limit == - 1) {
             writeCacheTo(out);
@@ -267,11 +267,11 @@ public final class Stream extends OutputStream {
         }
     }
 
-    public void writeCacheTo(final StringBuilder out) throws IOException {
+    public void writeCacheTo(final StringBuffer out) throws IOException {
         writeCacheTo(out, "UTF-8");
     }
 
-    public void writeCacheTo(final StringBuilder out, final String charsetName) throws IOException {
+    public void writeCacheTo(final StringBuffer out, final String charsetName) throws IOException {
         flush();
         if(isInMemory()) {
             if(this.currentStream instanceof ByteArrayOutputStream) {
