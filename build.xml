@@ -90,9 +90,8 @@
 
     <target name="clean"
             description="removes build-generated artifacts">
-		<delete dir="../FgsLucene/bin"/>
-		<delete dir="../FgsSolr2/bin"/>
-		<delete dir="../FgsZebra/bin"/>
+		<delete dir="../FgsLucene${genericsearch.version}/bin"/>
+		<delete dir="../FgsSolr2${genericsearch.version}/bin"/>
 		<delete dir="${compile.dir}"/>
 		<delete dir="${build.basedir}"/>
 		<delete dir="${dist.dir}"/>
@@ -241,8 +240,8 @@
 	</target>
 	
     <target name="includeengines" depends="">
-        <ant dir="../FgsLucene2.2" inheritAll="false"/>
-        <ant dir="../FgsSolr22.2" inheritAll="false"/>
+        <ant dir="../FgsLucene${genericsearch.version}" inheritAll="false"/>
+        <ant dir="../FgsSolr2${genericsearch.version}" inheritAll="false"/>
         <!--ant dir="../FgsZebra" inheritAll="false"/-->
     </target>
 	
