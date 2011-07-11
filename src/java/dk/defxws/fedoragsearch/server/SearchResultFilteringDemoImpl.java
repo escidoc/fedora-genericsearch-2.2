@@ -18,6 +18,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamSource;
 
+import dk.defxws.fedoragsearch.server.utils.IOUtils;
+import dk.defxws.fedoragsearch.server.utils.Stream;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -151,10 +153,11 @@ public class SearchResultFilteringDemoImpl implements SearchResultFiltering {
 		}
 		gfindObjectsElement.setAttribute("hitsDenied", Integer.toString(hitsDenied));
         String xsltPath = config.getConfigName()+"/index/"+config.getIndexName(null)+"/copyXml";
-        result = (new GTransformer()).transform(
+        Stream stream = (new GTransformer()).transform(
         		xsltPath,
         		new DOMSource(document),
         		new String[0]);
+        result = IOUtils.convertStreamToStringBuffer(stream);
     	return result;
     }
     

@@ -23,6 +23,8 @@ import java.util.StringTokenizer;
 
 import javax.xml.transform.stream.StreamSource;
 
+import dk.defxws.fedoragsearch.server.utils.IOUtils;
+import dk.defxws.fedoragsearch.server.utils.Stream;
 import org.apache.axis.AxisFault;
 import org.apache.log4j.Logger;
 
@@ -301,11 +303,11 @@ public class GenericOperationsImpl implements Operations {
         String xsltPath = config.getConfigName()
         		+"/repository/"+config.getRepositoryName(repositoryName)+"/"
         		+config.getRepositoryInfoResultXslt(repositoryName, resultPageXslt);
-        StringBuffer sb = (new GTransformer()).transform(
+        Stream sb = (new GTransformer()).transform(
         		xsltPath,
                 new StreamSource(repositoryStream),
                 new String[] {});
-        return sb.toString();
+        return IOUtils.convertStreamToStringBuffer(sb).toString();
     }
     
     public String getIndexInfo(
@@ -334,19 +336,19 @@ public class GenericOperationsImpl implements Operations {
                     " indexNames="+indexNames+
                     " indexDocXslt="+indexDocXslt+
                     " resultPageXslt="+resultPageXslt);
-        StringBuffer resultXml = new StringBuffer(); 
+        StringBuffer resultXml = new StringBuffer();
         String repositoryName = repositoryNameParam;
         if (repositoryNameParam==null || repositoryNameParam.equals(""))
         	repositoryName = config.getRepositoryName(repositoryName);
         resultXml.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
         resultXml.append("<resultPage");
         resultXml.append(" operation=\"updateIndex\"");
-        resultXml.append(" action=\""+action+"\"");
-        resultXml.append(" value=\""+value+"\"");
-        resultXml.append(" repositoryName=\""+repositoryName+"\"");
-        resultXml.append(" indexNames=\""+indexNames+"\"");
-        resultXml.append(" resultPageXslt=\""+resultPageXslt+"\"");
-        resultXml.append(" dateTime=\""+new Date()+"\"");
+        resultXml.append(" action=\"" + action + "\"");
+        resultXml.append(" value=\"" + value + "\"");
+        resultXml.append(" repositoryName=\"" + repositoryName + "\"");
+        resultXml.append(" indexNames=\"" + indexNames + "\"");
+        resultXml.append(" resultPageXslt=\"" + resultPageXslt + "\"");
+        resultXml.append(" dateTime=\"" + new Date() + "\"");
         resultXml.append(">\n");
         StringTokenizer st = new StringTokenizer(config.getIndexNames(indexNames));
         while (st.hasMoreTokens()) {
@@ -428,7 +430,7 @@ public class GenericOperationsImpl implements Operations {
         }
     }
     
-    public String getDatastreamText(
+    public Stream getDatastreamText(
             String pid,
             String repositoryName,
             String dsId)
@@ -448,7 +450,7 @@ public class GenericOperationsImpl implements Operations {
         		config.getTrustStorePass(repositoryName) );
     }
     
-    public String getDatastreamText(
+    public Stream getDatastreamText(
             String pid,
             String repositoryName,
             String dsId,
@@ -468,7 +470,7 @@ public class GenericOperationsImpl implements Operations {
             		+" fedoraPass="+fedoraPass
             		+" trustStorePath="+trustStorePath
             		+" trustStorePass="+trustStorePass);
-        StringBuffer dsBuffer = new StringBuffer();
+        Stream dsBuffer = new Stream();
         String mimetype = "";
     	FedoraResponse response = null;
         if (dsId != null) {
@@ -508,7 +510,7 @@ public class GenericOperationsImpl implements Operations {
             } catch (FedoraClientException e) {
                 if (e.getMessage().indexOf("no path")>-1 ||
                         e.getMessage().indexOf("DefaulAccess")>-1)
-                    return new String();
+                    return new Stream();
                 else
                     throw new GenericSearchException(e.getClass().getName()+": "+e.toString());
             } catch (IOException e) {
@@ -516,7 +518,7 @@ public class GenericOperationsImpl implements Operations {
             }
         }
         if (response != null && response.getEntityInputStream() != null) {
-            dsBuffer = (new TransformerToText().getText(response.getEntityInputStream(), mimetype));
+            dsBuffer = (TransformerToText.getText(response.getEntityInputStream(), mimetype));
         }
         if (logger.isDebugEnabled())
             logger.debug("getDatastreamText" +
@@ -524,10 +526,10 @@ public class GenericOperationsImpl implements Operations {
                     " dsId="+dsId+
                     " mimetype="+mimetype+
                     " dsBuffer="+dsBuffer.toString());
-        return dsBuffer.toString();
+        return dsBuffer;
     }
     
-    public StringBuffer getFirstDatastreamText(
+    public Stream getFirstDatastreamText(
             String pid,
             String repositoryName,
             String dsMimetypes)
@@ -547,7 +549,7 @@ public class GenericOperationsImpl implements Operations {
         		config.getTrustStorePass(repositoryName));
     }
     
-    public StringBuffer getFirstDatastreamText(
+    public Stream getFirstDatastreamText(
             String pid,
             String repositoryName,
             String dsMimetypes,
@@ -566,7 +568,7 @@ public class GenericOperationsImpl implements Operations {
             		+" fedoraPass="+fedoraPass
             		+" trustStorePath="+trustStorePath
             		+" trustStorePass="+trustStorePass);
-        StringBuffer dsBuffer = new StringBuffer();
+        Stream dsBuffer = new Stream();
 //        Datastream[] dsds = null;
 //        try {
 //            FedoraAPIM apim = getAPIM(
@@ -650,7 +652,7 @@ public class GenericOperationsImpl implements Operations {
             }
         }
         if (response != null && response.getEntityInputStream() != null) {
-            dsBuffer = (new TransformerToText().getText(response.getEntityInputStream(), mimetype));
+            dsBuffer = (TransformerToText.getText(response.getEntityInputStream(), mimetype));
         }
         if (logger.isDebugEnabled())
             logger.debug("getFirstDatastreamText" +
@@ -661,7 +663,7 @@ public class GenericOperationsImpl implements Operations {
         return dsBuffer;
     }
     
-    public StringBuffer getDisseminationText(
+    public Stream getDisseminationText(
             String pid,
             String repositoryName,
             String bDefPid, 
@@ -684,7 +686,7 @@ public class GenericOperationsImpl implements Operations {
         		config.getTrustStorePass(repositoryName) );
     }
     
-    public StringBuffer getDisseminationText(
+    public Stream getDisseminationText(
             String pid,
             String repositoryName,
             String bDefPid, 
@@ -719,7 +721,7 @@ public class GenericOperationsImpl implements Operations {
         if (logger.isDebugEnabled())
             logger.debug("getDisseminationText" +
                     " #parameters="+params.length);
-        StringBuffer dsBuffer = new StringBuffer();
+        Stream dsBuffer = new Stream();
         String mimetype = "";
     	FedoraResponse response = null;
         if (pid != null) {
@@ -776,7 +778,7 @@ public class GenericOperationsImpl implements Operations {
 
             } catch (FedoraClientException e) {
 				if (e.toString().indexOf("DisseminatorNotFoundException") > -1) {
-					return new StringBuffer();
+					return new Stream();
 				} else {
 					throw new GenericSearchException(e.toString());
 				}
@@ -785,7 +787,7 @@ public class GenericOperationsImpl implements Operations {
             }
         }
         if (response != null && response.getEntityInputStream() != null) {
-            dsBuffer = (new TransformerToText().getText(response.getEntityInputStream(), mimetype));
+            dsBuffer = (TransformerToText.getText(response.getEntityInputStream(), mimetype));
         }
         if (logger.isDebugEnabled())
             logger.debug("getDisseminationText" +

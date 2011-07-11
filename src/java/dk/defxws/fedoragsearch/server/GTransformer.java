@@ -10,6 +10,7 @@ package dk.defxws.fedoragsearch.server;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PipedInputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Date;
@@ -24,6 +25,7 @@ import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
+import dk.defxws.fedoragsearch.server.utils.Stream;
 import org.apache.log4j.Logger;
 
 import dk.defxws.fedoragsearch.server.errors.ConfigException;
@@ -114,12 +116,12 @@ public class GTransformer {
         }
     }
 
-    public StringBuffer transform(String xsltName, Source sourceStream, Object[] params) 
+    public Stream transform(String xsltName, Source sourceStream, Object[] params)
     throws GenericSearchException {
         return transform (xsltName, sourceStream, null, params);
     }
 
-    public StringBuffer transform(String xsltName, Source sourceStream, URIResolver uriResolver, Object[] params) 
+    public Stream transform(String xsltName, Source sourceStream, URIResolver uriResolver, Object[] params)
     throws GenericSearchException {
         if (logger.isDebugEnabled())
             logger.debug("xsltName="+xsltName);
@@ -130,16 +132,19 @@ public class GTransformer {
             transformer.setParameter((String)params[i], value);
         }
         transformer.setParameter("DATETIME", new Date());
-        StreamResult destStream = new StreamResult(new StringWriter());
+        Stream stream = new Stream();
+        StreamResult destStream = new StreamResult(stream);
         try {
             transformer.transform(sourceStream, destStream);
+            stream.lock();
         } catch (TransformerException e) {
             throw new GenericSearchException("transform "+xsltName+".xslt:\n", e);
+        } catch(IOException e) {
+            throw new GenericSearchException(e.getMessage(), e);
         }
-        StringWriter sw = (StringWriter)destStream.getWriter();
-//      if (logger.isDebugEnabled())
+        //      if (logger.isDebugEnabled())
 //      logger.debug("sw="+sw.getBuffer().toString());
-        return sw.getBuffer();
+        return stream;
     }
     
     /**
@@ -171,7 +176,7 @@ public class GTransformer {
      *
      * @throws TransformerConfigurationException, TransformerException.
      */
-    public StringBuffer transform(String xsltName, StreamSource sourceStream) 
+    public Stream transform(String xsltName, StreamSource sourceStream)
     throws GenericSearchException {
         return transform(xsltName, sourceStream, new String[]{});
     }
@@ -181,12 +186,12 @@ public class GTransformer {
      *
      * @throws TransformerConfigurationException, TransformerException.
      */
-    public StringBuffer transform(String xsltName, StringBuffer sb, String[] params) 
+    public Stream transform(String xsltName, StringBuffer sb, String[] params)
     throws GenericSearchException {
 //      if (logger.isDebugEnabled())
 //      logger.debug("sb="+sb);
         StringReader sr = new StringReader(sb.toString());
-        StringBuffer result = transform(xsltName, new StreamSource(sr), params);
+        Stream result = transform(xsltName, new StreamSource(sr), params);
 //      if (logger.isDebugEnabled())
 //      logger.debug("xsltName="+xsltName+" result="+result);
         return result;
@@ -197,7 +202,7 @@ public class GTransformer {
      *
      * @throws TransformerConfigurationException, TransformerException.
      */
-    public StringBuffer transform(String xsltName, StringBuffer sb) 
+    public Stream transform(String xsltName, StringBuffer sb)
     throws GenericSearchException {
         return transform(xsltName, sb, new String[]{});
     }

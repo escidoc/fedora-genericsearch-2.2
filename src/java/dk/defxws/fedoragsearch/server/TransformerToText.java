@@ -14,11 +14,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.io.UnsupportedEncodingException;
 
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.stream.StreamSource;
 
+import dk.defxws.fedoragsearch.server.utils.IOUtils;
+import dk.defxws.fedoragsearch.server.utils.Stream;
 import org.apache.log4j.Logger;
 import org.apache.lucene.demo.html.HTMLParser;
 import org.apache.pdfbox.cos.COSDocument;
@@ -28,9 +32,11 @@ import org.apache.pdfbox.exceptions.InvalidPasswordException;
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.util.PDFTextStripper;
+import org.apache.poi.hssf.record.formula.functions.Input;
 import org.apache.poi.hwpf.extractor.WordExtractor;
 
 import dk.defxws.fedoragsearch.server.errors.GenericSearchException;
+import sun.java2d.opengl.WGLCachingSurfaceManager;
 
 /**
  * performs transformations from formatted documents to text
@@ -38,7 +44,7 @@ import dk.defxws.fedoragsearch.server.errors.GenericSearchException;
  * @author  gsp@dtv.dk
  * @version 
  */
-public class TransformerToText {
+public final class TransformerToText {
     
     private static final Logger logger =
         Logger.getLogger(TransformerToText.class);
@@ -47,16 +53,10 @@ public class TransformerToText {
         "text/html", "application/xml", "application/pdf",
         "application/msword" };
     
-    public TransformerToText() {
+    private TransformerToText() {
     }
-    
-    /**
-     * 
-     * 
-     * @throws TransformerConfigurationException,
-     *             TransformerException.
-     */
-    public StringBuffer getText(InputStream doc, String mimetype)
+
+    public static Stream getText(InputStream doc, String mimetype)
             throws GenericSearchException {
         try {
             if (mimetype.equals("text/plain")) {
@@ -69,54 +69,36 @@ public class TransformerToText {
             } else if (mimetype.equals("application/pdf")) {
                 return getTextFromPDF(doc);
             } else if (mimetype.equals("application/ps")) {
-                return new StringBuffer();
+                return new Stream(); // TODO: Warum is dies nötig?
             } else if (mimetype.equals("application/msword")) {
                 return getTextFromDOC(doc);
             } else
-                return new StringBuffer();
-        } catch (Throwable e) {
+                return new Stream();
+        } catch (Exception e) {
             if (Boolean.parseBoolean(
                 Config.getCurrentConfig().getIgnoreTextExtractionErrors())) {
                 logger.warn(e);
-                return new StringBuffer("textfromfilenotextractable");
+                return createErrorStream("textfromfilenotextractable");
             } else {
                 throw new GenericSearchException(e.toString());
             }
         }
     }
 
-    /**
-     * 
-     *
-     * @throws GenericSearchException.
-     */
-    private StringBuffer getTextFromText(InputStream doc) 
+    private static Stream getTextFromText(InputStream input)
     throws GenericSearchException {
-        StringBuffer docText = new StringBuffer();
-        InputStreamReader isr = null;
+        Stream docText = new Stream();
         try {
-            isr = new InputStreamReader(doc, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new GenericSearchException("encoding exception", e);
-        }
-        try {
-            int c = isr.read();
-            while (c>-1) {
-                docText.append((char)c);
-                c=isr.read();
-            }
-        } catch (IOException e) {
+            IOUtils.copy(input, docText);
+            docText.lock();
+        } catch(IOException e) {
             throw new GenericSearchException(e.toString());
         }
         return docText;
     }
 
-/**
- * 
- *
- * @throws GenericSearchException.
- */
-private StringBuffer getTextFromXML(InputStream doc) 
+
+private static Stream getTextFromXML(InputStream doc)
 throws GenericSearchException {
     InputStreamReader isr = null;
     try {
@@ -124,41 +106,28 @@ throws GenericSearchException {
     } catch (UnsupportedEncodingException e) {
         throw new GenericSearchException("encoding exception", e);
     }
-    StringBuffer docText = (new GTransformer()).transform(
+    Stream docText = (new GTransformer()).transform(
             Config.getDefaultConfigName()+ "/index/textFromXml", 
             new StreamSource(isr));
-    docText.delete(0, docText.indexOf(">")+1);
+    // TODO
+    //docText.delete(0, docText.indexOf('>')+1);
     return docText;
 }
-    
-    /**
-     * 
-     *
-     * @throws GenericSearchException.
-     */
-    private StringBuffer getTextFromHTML(InputStream doc) 
+
+    private static Stream getTextFromHTML(InputStream doc)
     throws GenericSearchException {
-        StringBuffer docText = new StringBuffer();
+        Stream docText = new Stream();
         HTMLParser htmlParser = new HTMLParser(doc);
         try {
-            InputStreamReader isr = (InputStreamReader) htmlParser.getReader();
-            int c = isr.read();
-            while (c>-1) {
-                docText.append((char)c);
-                c=isr.read();
-            }
+            IOUtils.copy(htmlParser.getReader(), docText);
+            docText.lock();
         } catch (IOException e) {
             throw new GenericSearchException(e.toString());
         }
         return docText;
     }
-    
-    /**
-     * MIH: Added for MS-Word Support
-     * 
-     * @throws GenericSearchException.
-     */
-    private StringBuffer getTextFromDOC(InputStream doc)
+
+    private static Stream getTextFromDOC(InputStream doc)
             throws GenericSearchException {
         WordExtractor wd = null;
         try {
@@ -171,7 +140,11 @@ throws GenericSearchException {
                     buffer.setCharAt(c, ' ');
                 }
             }
-            return buffer;
+            // TODO: Unterstützt WordExtractor keine Stream?
+            Stream stream = new Stream();
+            stream.write(buffer.toString().getBytes("UTF-8"));
+            stream.lock();
+            return stream;
         } catch (Exception e) {
             throw new GenericSearchException("Cannot parse Word document", e);
         } finally {
@@ -179,12 +152,7 @@ throws GenericSearchException {
         }
     }
 
-    /**
-     * 
-     * 
-     * @throws GenericSearchException.
-     */
-    private StringBuffer getTextFromPDF(InputStream doc)
+    private static Stream getTextFromPDF(InputStream doc)
             throws GenericSearchException {
         String textExtractorCommand = Config.getCurrentConfig().getPdfTextExtractorCommand();
         if (textExtractorCommand == null || textExtractorCommand.equals("")) {
@@ -205,7 +173,7 @@ throws GenericSearchException {
         return parser.getDocument();
     }
     
-    private void closeCOSDocument(COSDocument cosDoc) {
+    private static void closeCOSDocument(COSDocument cosDoc) {
         if (cosDoc != null) {
             try {
                 cosDoc.close();
@@ -215,9 +183,8 @@ throws GenericSearchException {
         }
     }
     
-    private StringBuffer getTextFromPDFWithPdfBox(InputStream doc)
+    private static Stream getTextFromPDFWithPdfBox(InputStream doc)
     throws GenericSearchException  {
-        StringBuffer docText = new StringBuffer();
         COSDocument cosDoc = null;
         String password = "";
         boolean errorFlag = Boolean.parseBoolean(
@@ -228,7 +195,7 @@ throws GenericSearchException {
             closeCOSDocument(cosDoc);
             if (errorFlag) {
             	logger.warn(e);
-                return new StringBuffer("textfrompdffilenotextractable");
+                return createErrorStream("textfrompdffilenotextractable");
             } else {
                 throw new GenericSearchException("Cannot parse PDF document", e);
             }
@@ -244,7 +211,7 @@ throws GenericSearchException {
             closeCOSDocument(cosDoc);
             if (errorFlag) {
             	logger.warn(e);
-                return new StringBuffer("textfrompdffilenotextractable");
+                return createErrorStream("textfrompdffilenotextractable");
             } else {
                 throw new GenericSearchException("Cannot decrypt PDF document",
                         e);
@@ -253,7 +220,7 @@ throws GenericSearchException {
             closeCOSDocument(cosDoc);
             if (errorFlag) {
             	logger.warn(e);
-                return new StringBuffer("textfrompdffilenotextractable");
+                return createErrorStream("textfrompdffilenotextractable");
             } else {
                 throw new GenericSearchException("Cannot decrypt PDF document",
                         e);
@@ -262,22 +229,24 @@ throws GenericSearchException {
             closeCOSDocument(cosDoc);
             if (errorFlag) {
             	logger.warn(e);
-                return new StringBuffer("textfrompdffilenotextractable");
+                return createErrorStream("textfrompdffilenotextractable");
             } else {
                 throw new GenericSearchException("Cannot decrypt PDF document",
                         e);
             }
         }
-
+        Stream docText = new Stream();
         // extract PDF document's textual content
         try {
             PDFTextStripper stripper = new PDFTextStripper();
-            docText = new StringBuffer(stripper.getText(new PDDocument(cosDoc)));
-        } catch (Throwable e) {
+            // TODO: Unterstützt PDFTextStripper keine Streams?
+            docText.write(stripper.getText(new PDDocument(cosDoc)).getBytes());
+            docText.lock();
+        } catch (Exception e) {
             closeCOSDocument(cosDoc);
             if (errorFlag) {
             	logger.warn(e);
-                return new StringBuffer("textfrompdffilenotextractable");
+                return createErrorStream("textfrompdffilenotextractable");
             } else {
                 throw new GenericSearchException(
                         "Cannot parse PDF document", e);
@@ -287,8 +256,8 @@ throws GenericSearchException {
         return docText;
     }
 
-    private StringBuffer getTextFromPDFWithItext(InputStream doc) throws GenericSearchException {
-        StringBuffer docText = new StringBuffer();
+    private static Stream getTextFromPDFWithItext(InputStream doc) throws GenericSearchException {
+        Stream docText = new Stream();
         boolean errorFlag = Boolean.parseBoolean(
             Config.getCurrentConfig().getIgnoreTextExtractionErrors());
         try {
@@ -297,11 +266,12 @@ throws GenericSearchException {
 //            for (int i = 1; i <= reader.getNumberOfPages(); i++) {
 //                docText.append(PdfTextExtractor.getTextFromPage(reader, i)).append(" ");
 //            }
-        	docText.append(" ");
-        } catch (Throwable e) {
+        	docText.write(" ".getBytes("UTF-8")); // TODO: Warum ist der obere Code auskommentiert?
+            docText.lock();
+        } catch (Exception e) {
             if (errorFlag) {
             	logger.warn(e);
-                return new StringBuffer("textfrompdffilenotextractable");
+                return createErrorStream("textfrompdffilenotextractable");
             } else {
                 throw new GenericSearchException(
                         "Cannot parse PDF document", e);
@@ -310,11 +280,10 @@ throws GenericSearchException {
         return docText;
     }
 
-    private StringBuffer getTextFromPDFWithExternalTool(InputStream doc) throws GenericSearchException {
+    private static Stream getTextFromPDFWithExternalTool(InputStream doc) throws GenericSearchException {
         boolean errorFlag = Boolean.parseBoolean(
             Config.getCurrentConfig().getIgnoreTextExtractionErrors());
-        StringBuffer textBuffer = new StringBuffer("");
-        
+        Stream textBuffer = new Stream();
         String inputFileName = null;
         String outputFileName = null;
         FileOutputStream fop = null;
@@ -400,13 +369,15 @@ throws GenericSearchException {
                     new InputStreamReader(fileIn, "UTF-8"));
             String str = new String("");
             while ((str = in.readLine()) != null) {
-                textBuffer.append(str).append(" ");
+                textBuffer.write(str.getBytes("UTF-8"));
+                textBuffer.write(" ".getBytes("UFT-8")); // TODO: Wofür sind Spaces nötig?
             }
+            textBuffer.lock();
             fileIn.close();
-        } catch (Throwable e) {
+        } catch (Exception e) {
             if (errorFlag) {
             	logger.warn(e);
-                return new StringBuffer("textfrompdffilenotextractable");
+                return createErrorStream("textfrompdffilenotextractable");
             } else {
                 throw new GenericSearchException(
                         "Cannot parse PDF document", e);
@@ -477,6 +448,17 @@ throws GenericSearchException {
      }
 
      public static void main(String[] args) {
+    }
+
+    private static Stream createErrorStream(String errorMessage) throws GenericSearchException {
+        Stream errorStream = new Stream();
+        try {
+            errorStream.write(errorMessage.getBytes("UTF-8"));
+            errorStream.lock();
+        } catch(IOException e) {
+            throw new GenericSearchException(e.toString());
+        }
+        return errorStream;
     }
 
 }

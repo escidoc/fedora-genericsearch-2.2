@@ -20,6 +20,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.ServletException;
 
+import dk.defxws.fedoragsearch.server.utils.IOUtils;
+import dk.defxws.fedoragsearch.server.utils.Stream;
 import org.apache.log4j.Logger;
 
 import dk.defxws.fedoragsearch.server.errors.GenericSearchException;
@@ -151,9 +153,10 @@ public class RESTImpl extends HttpServlet {
         params[5] = request.getRemoteUser();
         params[6] = "SRFTYPE";
         params[7] = config.getSearchResultFilteringType();
-        resultXml = (new GTransformer()).transform(
-        				config.getConfigName()+"/rest/"+restXslt, 
+        Stream stream = (new GTransformer()).transform(
+        				config.getConfigName()+"/rest/"+restXslt,
         				resultXml, params);
+        resultXml = IOUtils.convertStreamToStringBuffer(stream);
 //        if (logger.isDebugEnabled())
 //            logger.debug("after "+restXslt+" result=\n"+resultXml);
         
