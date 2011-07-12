@@ -11,10 +11,17 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PipedInputStream;
+import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Date;
 
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.events.XMLEvent;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
@@ -90,13 +97,8 @@ public class GTransformer {
 
             StreamSource xslt = new StreamSource(stylesheet);
             transformer = tfactory.newTransformer(xslt);
-        } catch (TransformerConfigurationException e) {
-            throw new ConfigException("getTransformer "+xsltPathName+":\n", e);
-        } catch (TransformerFactoryConfigurationError e) {
-            throw new ConfigException("getTransformerFactory "+xsltPathName+":\n", e);
         } catch (Exception e) {
-            //MIH: added for URLDecoding
-            throw new ConfigException("get stylesheet from url "+xsltPath+":\n", e);
+            logger.info("No xslt stylesheet found!");
         }
         return transformer;
     }
@@ -106,7 +108,7 @@ public class GTransformer {
      *
      * @throws TransformerConfigurationException, TransformerException.
      */
-    public void transform(String xsltName, StreamSource sourceStream, StreamResult destStream) 
+    public void transform(String xsltName, StreamSource sourceStream, StreamResult destStream)
     throws GenericSearchException {
         Transformer transformer = getTransformer(xsltName);
         try {
@@ -123,29 +125,51 @@ public class GTransformer {
 
     public Stream transform(String xsltName, Source sourceStream, URIResolver uriResolver, Object[] params)
     throws GenericSearchException {
+        Stream stream = new Stream();
         if (logger.isDebugEnabled())
             logger.debug("xsltName="+xsltName);
         Transformer transformer = getTransformer(xsltName, uriResolver);
-        for (int i=0; i<params.length; i=i+2) {
-            Object value = params[i+1];
-            if (value==null) value = "";
-            transformer.setParameter((String)params[i], value);
+        if(transformer != null) {
+            for(int i = 0; i < params.length; i = i + 2) {
+                Object value = params[i + 1];
+                if(value == null) {
+                    value = "";
+                }
+                transformer.setParameter((String) params[i], value);
+            }
+            transformer.setParameter("DATETIME", new Date());
+            StreamResult destStream = new StreamResult(stream);
+            try {
+                transformer.transform(sourceStream, destStream);
+                stream.lock();
+            } catch(TransformerException e) {
+                throw new GenericSearchException("transform " + xsltName + ".xslt:\n", e);
+            } catch(IOException e) {
+                throw new GenericSearchException(e.getMessage(), e);
+            }
+            //      if (logger.isDebugEnabled())
+            //      logger.debug("sw="+sw.getBuffer().toString());
+        } else {
+            try {
+                XMLInputFactory factory = XMLInputFactory.newInstance();
+                XMLEventReader reader = factory.createXMLEventReader(sourceStream);
+                while(reader.hasNext()) {
+                    XMLEvent event = reader.nextEvent();
+                    if(event.getEventType() == XMLEvent.CHARACTERS) {
+                        stream.write(event.asCharacters().getData().getBytes("UTF-8"));
+                    }
+                    reader.next();
+                }
+            } catch(IOException e) {
+                throw new GenericSearchException(e.getMessage(), e);
+            } catch(XMLStreamException e) {
+                throw new GenericSearchException(e.getMessage(), e);
+            }
         }
-        transformer.setParameter("DATETIME", new Date());
-        Stream stream = new Stream();
-        StreamResult destStream = new StreamResult(stream);
-        try {
-            transformer.transform(sourceStream, destStream);
-            stream.lock();
-        } catch (TransformerException e) {
-            throw new GenericSearchException("transform "+xsltName+".xslt:\n", e);
-        } catch(IOException e) {
-            throw new GenericSearchException(e.getMessage(), e);
-        }
-        //      if (logger.isDebugEnabled())
-//      logger.debug("sw="+sw.getBuffer().toString());
         return stream;
     }
+
+
     
     /**
      * 
