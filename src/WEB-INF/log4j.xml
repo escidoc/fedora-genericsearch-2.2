@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- $Id: log4j.xml,v 1.1 2006/08/09 15:36:08 cwilper Exp $ -->
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+        
+  <appender name="STDOUT" class="org.apache.log4j.ConsoleAppender">
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="%p %d (%c{1}) %m%n"/>
+    </layout>
+  </appender>
+  
+  <appender name="FILEOUT" class="org.apache.log4j.DailyRollingFileAppender">
+    <param name="datePattern" value="'.'yyyy-MM-dd" />
+    <param name="File" value="${catalina.home}/log/fedoragsearch.log"/>
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="%p %d (%c{1}) %m%n"/>
+    </layout>
+  </appender>
+  
+<!--appender name="SEARCHFILEOUT" class="org.apache.log4j.DailyRollingFileAppender">
+    <param name="datePattern" value="'.'yyyy-MM-dd" />
+    <param name="File" value="${catalina.home}/log/gsearch.log"/>
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="%p %d (%c{1}) %m%n"/>
+    </layout>
+    <filter class="org.apache.log4j.varia.StringMatchFilter">
+         <param name="StringToMatch" value="timemeasure" />
+         <param name="AcceptOnMatch" value="true" />
+    </filter>
+    <filter class="org.apache.log4j.varia.DenyAllFilter"/>
+  </appender-->
+
+  <logger name="dk.defxws.fedoragsearch" additivity="false">
+    <level value="INFO" />
+    <appender-ref ref="FILEOUT"/>
+    <!--appender-ref ref="SEARCHFILEOUT"/-->
+  </logger>
+  
+  <logger name="dk.defxws.fgszebra" additivity="false">
+    <level value="INFO" />
+    <appender-ref ref="FILEOUT"/>
+  </logger>
+  
+  <logger name="dk.defxws.fgslucene" additivity="false">
+    <level value="INFO" />
+    <appender-ref ref="FILEOUT"/>
+    <!--appender-ref ref="SEARCHFILEOUT"/-->
+  </logger>
+
+  <root>
+    <level value="WARN" />
+    <appender-ref ref="STDOUT"/>
+  </root>
+  
+</log4j:configuration>
