@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--  $Id: build.xml 7851 2008-12-03 09:58:16Z gertsp $ -->
-<project name="FedoraGenericSearch for 1.3" default="builddownload" basedir=".">
+<project name="FedoraGenericSearch for 1.3" default="binrelease" basedir=".">
 	<description>Fedora Generic Search Service</description>
 
     <property environment="env"/>
@@ -20,7 +20,7 @@
 
 	<property name="build.dir" location="${build.basedir}/webapp" />
 	<property name="plugin.dir" location="${build.dir}/WEB-INF/classes" />
-	<property name="project.dir" location="${build.basedir}/eclipseprojects/FedoraGenericSearch" />
+	<property name="project.dir" location="${build.basedir}/eclipseprojects/FedoraGenericSearch${genericsearch.version}" />
 	<property name="tomcat.basename" value="tomcat" />
 	<property name="dist.dir" location="dist" />
     <property name="lib.dir" location="lib"/>
@@ -90,9 +90,9 @@
 
     <target name="clean"
             description="removes build-generated artifacts">
-		<delete dir="../FgsLucene/bin"/>
-		<delete dir="../FgsSolr2/bin"/>
-		<delete dir="../FgsZebra/bin"/>
+		<delete dir="../FgsLucene${genericsearch.version}/bin"/>
+		<delete dir="../FgsSolr2${genericsearch.version}/bin"/>
+		<delete dir="../FgsZebra${genericsearch.version}/bin"/>
 		<delete dir="${compile.dir}"/>
 		<delete dir="${build.basedir}"/>
 		<delete dir="${dist.dir}"/>
@@ -154,9 +154,11 @@
           <include name="images/**"/>
         </fileset>
       </copy>
-      <zip zipfile="${build.basedir}/release/genericsearch-${genericsearch.version}.zip"
-           basedir="${build.basedir}/release" includes="genericsearch-${genericsearch.version}/**"/>
+      <!--zip zipfile="${build.basedir}/release/${app.name}-${genericsearch.version}.zip"
+           basedir="${build.basedir}/release" includes="genericsearch-${genericsearch.version}/**"/ -->
       <delete dir="${build.basedir}/release/genericsearch-${genericsearch.version}"/>
+       <zip zipfile="${dist.dir}/${app.name}-${genericsearch.version}-src.zip"
+            basedir="${build.basedir}/eclipseprojects" includes="**"/>
     </target>
   
     <target name="srcrelease" depends="clean">
@@ -241,8 +243,8 @@
 	</target>
 	
     <target name="includeengines" depends="">
-        <ant dir="../FgsLucene2.2" inheritAll="false"/>
-        <ant dir="../FgsSolr22.2" inheritAll="false"/>
+        <ant dir="../FgsLucene${genericsearch.version}" inheritAll="false"/>
+        <ant dir="../FgsSolr2${genericsearch.version}" inheritAll="false"/>
         <!--ant dir="../FgsZebra" inheritAll="false"/-->
     </target>
 	
