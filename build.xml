@@ -153,10 +153,10 @@
           <include name="images/**"/>
         </fileset>
       </copy>
-      <zip zipfile="${build.basedir}/release/genericsearch-${genericsearch.version}.zip"
-           basedir="${build.basedir}/release" includes="genericsearch-${genericsearch.version}/**"/>
+      <!--zip zipfile="${dist.dir}/fedoragsearch-${genericsearch.version}.zip"
+           basedir="${build.basedir}/release" includes="genericsearch-${genericsearch.version}/**"/ -->
       <delete dir="${build.basedir}/release/genericsearch-${genericsearch.version}"/>
-      <zip zipfile="${build.basedir}/release/genericsearch-${genericsearch.version}-src.zip"
+      <zip zipfile="${dist.dir}/fedoragsearch-${genericsearch.version}-src.zip"
            basedir="${build.basedir}/eclipseprojects" includes="**"/>
     </target>
   
