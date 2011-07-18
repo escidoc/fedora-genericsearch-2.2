@@ -156,7 +156,7 @@
       <!--zip zipfile="${dist.dir}/fedoragsearch-${genericsearch.version}.zip"
            basedir="${build.basedir}/release" includes="genericsearch-${genericsearch.version}/**"/ -->
       <delete dir="${build.basedir}/release/genericsearch-${genericsearch.version}"/>
-      <zip zipfile="${dist.dir}/${app.name}-${genericsearch.version}-src.zip"
+      <zip zipfile="${dist.dir}/${app.name}-${genericsearch.version}-sources.zip"
            basedir="${build.basedir}/eclipseprojects" includes="**"/>
     </target>
   
