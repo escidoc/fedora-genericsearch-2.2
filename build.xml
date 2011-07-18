@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--  $Id: build.xml 7851 2008-12-03 09:58:16Z gertsp $ -->
-<project name="FedoraGenericSearch" default="builddownload" basedir=".">
+<project name="FedoraGenericSearch" default="binrelease" basedir=".">
 	<description>Fedora Generic Search Service</description>
 
     <property environment="env"/>
@@ -156,6 +156,8 @@
       <zip zipfile="${build.basedir}/release/genericsearch-${genericsearch.version}.zip"
            basedir="${build.basedir}/release" includes="genericsearch-${genericsearch.version}/**"/>
       <delete dir="${build.basedir}/release/genericsearch-${genericsearch.version}"/>
+      <zip zipfile="${build.basedir}/release/genericsearch-${genericsearch.version}-src.zip"
+           basedir="${build.basedir}/eclipseprojects" includes="**"/>
     </target>
   
     <target name="srcrelease" depends="clean">
