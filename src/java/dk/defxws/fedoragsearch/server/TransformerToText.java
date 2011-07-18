@@ -36,7 +36,6 @@ import org.apache.poi.hssf.record.formula.functions.Input;
 import org.apache.poi.hwpf.extractor.WordExtractor;
 
 import dk.defxws.fedoragsearch.server.errors.GenericSearchException;
-import sun.java2d.opengl.WGLCachingSurfaceManager;
 
 /**
  * performs transformations from formatted documents to text

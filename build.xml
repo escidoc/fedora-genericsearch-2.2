@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--  $Id: build.xml 7851 2008-12-03 09:58:16Z gertsp $ -->
-<project name="FedoraGenericSearch" default="builddownload" basedir=".">
+<project name="FedoraGenericSearch" default="binrelease" basedir=".">
 	<description>Fedora Generic Search Service</description>
 
     <property environment="env"/>
@@ -20,7 +20,7 @@
 
 	<property name="build.dir" location="${build.basedir}/webapp" />
 	<property name="plugin.dir" location="${build.dir}/WEB-INF/classes" />
-	<property name="project.dir" location="${build.basedir}/eclipseprojects/FedoraGenericSearch" />
+	<property name="project.dir" location="${build.basedir}/eclipseprojects/FedoraGenericSearch${genericsearch.version}" />
 	<property name="tomcat.basename" value="tomcat" />
 	<property name="dist.dir" location="dist" />
     <property name="lib.dir" location="lib"/>
@@ -153,9 +153,11 @@
           <include name="images/**"/>
         </fileset>
       </copy>
-      <zip zipfile="${build.basedir}/release/genericsearch-${genericsearch.version}.zip"
-           basedir="${build.basedir}/release" includes="genericsearch-${genericsearch.version}/**"/>
+      <!--zip zipfile="${build.basedir}/release/genericsearch-${genericsearch.version}.zip"
+           basedir="${build.basedir}/release" includes="genericsearch-${genericsearch.version}/**"/ -->
       <delete dir="${build.basedir}/release/genericsearch-${genericsearch.version}"/>
+      <zip zipfile="${dist.dir}/${app.name}-${genericsearch.version}-src.zip"
+           basedir="${build.basedir}/eclipseprojects" includes="**"/>
     </target>
   
     <target name="srcrelease" depends="clean">
