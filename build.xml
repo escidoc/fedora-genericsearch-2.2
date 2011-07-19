@@ -197,7 +197,7 @@
 		<copy file="lib/axis-1.4.jar" tofile="${build.dir}/WEB-INF/lib/axis-1.4.jar" />
 		<copy file="lib/fedora-client-3.2.1.jar" tofile="${build.dir}/WEB-INF/lib/fedora-client-3.2.1.jar" />
 		<copy file="lib/fedora-messaging-client-3.1.jar" tofile="${build.dir}/WEB-INF/lib/fedora-messaging-client-3.1.jar" />
-		<copy file="lib/fedora-server-3.1.jar" tofile="${build.dir}/WEB-INF/lib/fedora-server-3.1.jar" />
+		<copy file="lib/fedora-server-3.2.1.jar" tofile="${build.dir}/WEB-INF/lib/fedora-server-3.2.1.jar" />
         <copy file="lib/escidoc/common.jar" tofile="${build.dir}/WEB-INF/lib/common.jar" />
 
 		<copy file="lib/fedora-rest-client/fedora-client-0.1.3.jar" tofile="${build.dir}/WEB-INF/lib/fedora-client-0.1.3.jar" />
