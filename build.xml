@@ -157,7 +157,12 @@
            basedir="${build.basedir}/release" includes="genericsearch-${genericsearch.version}/**"/ -->
       <delete dir="${build.basedir}/release/genericsearch-${genericsearch.version}"/>
       <zip zipfile="${dist.dir}/${app.name}-${genericsearch.version}-sources.zip"
-           basedir="${build.basedir}/eclipseprojects" includes="**"/>
+           basedir="${build.basedir}/eclipseprojects">
+      	<include name="**"/>
+      	<exclude name="**/.classpath"/>
+  		<exclude name="**/.project"/>
+      	<exclude name="**/.settings/**"/>
+      </zip>
     </target>
   
     <target name="srcrelease" depends="clean">
