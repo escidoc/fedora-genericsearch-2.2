@@ -19,7 +19,7 @@
   ~ terms.
   -->
 <jboss-web>
-    <context-root>/</context-root>
+    <context-root>/fedoragsearch</context-root>
     <class-loading>
         <loader-repository>
             org.escidoc:loader=escidocClassLoader
