@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--  $Id: build.xml 7851 2008-12-03 09:58:16Z gertsp $ -->
-<project name="FedoraGenericSearch" default="binrelease" basedir=".">
+<project name="FedoraGenericSearch" default="binrelease" basedir="." xmlns:artifact="antlib:org.apache.maven.artifact.ant">
 	<description>Fedora Generic Search Service</description>
 
     <property environment="env"/>
@@ -30,6 +30,13 @@
 
 	<property name="junit.build.dir"		   location="${build.basedir}/junit"/>
 	<property name="junit.src.dir"             location="src/test/junit"/>
+
+        <!-- properties for deployment to Artifactory -->
+        <property name="artifactory.url" value="https://www.escidoc.org/artifactory/libs-snapshots-local" />
+        <!-- build version, user name and password must be given from the command line via -Dusername=... -Dpassword=... -->
+        <property name="artifactory.user" value="${username}" />
+        <property name="artifactory.password" value="${password}" />
+
 	<!-- 
     <path id="compile.classpath">
       <pathelement path="${lib.axis}"/>
@@ -132,6 +139,7 @@
 		<copy file="src/WEB-INF/web-withoutAuthN.xml" todir="${build.dir}/WEB-INF" />
 		<copy file="src/WEB-INF/web-withAuthN.xml" todir="${build.dir}/WEB-INF" />
 		<copy file="src/WEB-INF/server-config.wsdd" todir="${build.dir}/WEB-INF" />
+		<copy file="src/WEB-INF/jboss-web.xml" todir="${build.dir}/WEB-INF" />
 		<copy file="src/WEB-INF/log4j.xml" todir="${build.dir}/WEB-INF/classes" />
 		<copy todir="${plugin.dir}">
 			<fileset dir="bin"/>
@@ -322,5 +330,29 @@
 			<test name="${test}"/>
 		</junit>
 	</target>
-    	
+
+
+        <!-- example usage: ant -Dbuild.version=1.4.6 -Dusername=hans -Dpassword=wurst deploy -->
+
+        <target name="deploy" depends="binrelease" description="Deploy war file to local repository and Artifactory">
+                <artifact:pom id="memorypom" groupId="org.escidoc" artifactId="fedoragsearch_full" version="${build.version}" name="Fedora GSearch for eSciDoc" packaging="war" />
+
+                <!-- The install and deploy tasks cannot use the in-memory-POM directly so we have to write it into a file first. -->
+                <artifact:writepom pomRefId="memorypom" file="${dist.dir}/fedoragsearch_full-${build.version}.pom" />
+                <artifact:pom id="filepom" file="${dist.dir}/fedoragsearch_full-${build.version}.pom" />
+
+                <!-- install into local repository -->
+                <artifact:install file="${dist.dir}/${war.name}">
+                        <pom refid="filepom" />
+                </artifact:install>
+
+                <!-- copy to Artifactory -->
+                <artifact:deploy file="${dist.dir}/${war.name}">
+                        <remoteRepository url="${artifactory.url}">
+                                <authentication username="${artifactory.user}" password="${artifactory.password}" />
+                        </remoteRepository>
+                        <pom refid="filepom" />
+                </artifact:deploy>
+        </target>
+
 </project>
