@@ -32,7 +32,7 @@
 	<property name="junit.src.dir"             location="src/test/junit"/>
 
         <!-- properties for deployment to Artifactory -->
-        <property name="artifactory.url" value="https://www.escidoc.org/artifactory/libs-snapshots-local" />
+        <property name="artifactory.url" value="https://www.escidoc.org/artifactory/libs-releases-local" />
         <!-- build version, user name and password must be given from the command line via -Dusername=... -Dpassword=... -->
         <property name="artifactory.user" value="${username}" />
         <property name="artifactory.password" value="${password}" />
