@@ -335,19 +335,28 @@
         <!-- example usage: ant -Dbuild.version=1.4.6 -Dusername=hans -Dpassword=wurst deploy -->
 
         <target name="deploy" depends="binrelease" description="Deploy war file to local repository and Artifactory">
+                <!-- deploy war -->
                 <artifact:pom id="memorypom" groupId="org.escidoc" artifactId="fedoragsearch_full" version="${build.version}" name="Fedora GSearch for eSciDoc" packaging="war" />
-
-                <!-- The install and deploy tasks cannot use the in-memory-POM directly so we have to write it into a file first. -->
                 <artifact:writepom pomRefId="memorypom" file="${dist.dir}/fedoragsearch_full-${build.version}.pom" />
                 <artifact:pom id="filepom" file="${dist.dir}/fedoragsearch_full-${build.version}.pom" />
-
-                <!-- install into local repository -->
                 <artifact:install file="${dist.dir}/${war.name}">
                         <pom refid="filepom" />
                 </artifact:install>
-
-                <!-- copy to Artifactory -->
                 <artifact:deploy file="${dist.dir}/${war.name}">
+                        <remoteRepository url="${artifactory.url}">
+                                <authentication username="${artifactory.user}" password="${artifactory.password}" />
+                        </remoteRepository>
+                        <pom refid="filepom" />
+                </artifact:deploy>
+
+                <!-- deploy sources -->
+                <artifact:pom id="memorypom" groupId="org.escidoc" artifactId="fedoragsearch_src" version="${build.version}" name="Fedora GSearch for eSciDoc (sources)" packaging="zip" />
+                <artifact:writepom pomRefId="memorypom" file="${dist.dir}/fedoragsearch_src-${build.version}.pom" />
+                <artifact:pom id="filepom" file="${dist.dir}/fedoragsearch_src-${build.version}.pom" />
+                <artifact:install file="${dist.dir}/${app.name}-${genericsearch.version}-sources.zip">
+                        <pom refid="filepom" />
+                </artifact:install>
+                <artifact:deploy file="${dist.dir}/${app.name}-${genericsearch.version}-sources.zip">
                         <remoteRepository url="${artifactory.url}">
                                 <authentication username="${artifactory.user}" password="${artifactory.password}" />
                         </remoteRepository>
