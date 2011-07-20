@@ -338,10 +338,10 @@
                 <artifact:pom id="memorypom" groupId="org.escidoc" artifactId="fedoragsearch" version="${build.version}" name="Fedora GSearch for eSciDoc" packaging="war" />
                 <artifact:writepom pomRefId="memorypom" file="${dist.dir}/fedoragsearch-${build.version}.pom" />
                 <artifact:pom id="filepom" file="${dist.dir}/fedoragsearch-${build.version}.pom" />
-                <artifact:install file="${dist.dir}/${war.name}">
+                <artifact:install file="${dist.dir}/${nolibs.war.name}">
                         <pom refid="filepom" />
                 </artifact:install>
-                <artifact:deploy file="${dist.dir}/${war.name}">
+                <artifact:deploy file="${dist.dir}/${nolibs.war.name}">
                         <remoteRepository url="${artifactory.url}">
                                 <authentication username="${artifactory.user}" password="${artifactory.password}" />
                         </remoteRepository>
