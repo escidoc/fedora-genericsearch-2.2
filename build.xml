@@ -336,9 +336,9 @@
 
         <target name="deploy" depends="binrelease" description="Deploy war file to local repository and Artifactory">
                 <!-- deploy war -->
-                <artifact:pom id="memorypom" groupId="org.escidoc" artifactId="fedoragsearch_full" version="${build.version}" name="Fedora GSearch for eSciDoc" packaging="war" />
-                <artifact:writepom pomRefId="memorypom" file="${dist.dir}/fedoragsearch_full-${build.version}.pom" />
-                <artifact:pom id="filepom" file="${dist.dir}/fedoragsearch_full-${build.version}.pom" />
+                <artifact:pom id="memorypom" groupId="org.escidoc" artifactId="fedoragsearch" version="${build.version}" name="Fedora GSearch for eSciDoc" packaging="war" />
+                <artifact:writepom pomRefId="memorypom" file="${dist.dir}/fedoragsearch-${build.version}.pom" />
+                <artifact:pom id="filepom" file="${dist.dir}/fedoragsearch-${build.version}.pom" />
                 <artifact:install file="${dist.dir}/${war.name}">
                         <pom refid="filepom" />
                 </artifact:install>
