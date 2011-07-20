@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--  $Id: build.xml 7851 2008-12-03 09:58:16Z gertsp $ -->
-<project name="FedoraGenericSearch" default="binrelease" basedir=".">
+<project name="FedoraGenericSearch" default="binrelease" basedir="." xmlns:artifact="antlib:org.apache.maven.artifact.ant">
 	<description>Fedora Generic Search Service</description>
 
     <property environment="env"/>
@@ -30,6 +30,13 @@
 
 	<property name="junit.build.dir"		   location="${build.basedir}/junit"/>
 	<property name="junit.src.dir"             location="src/test/junit"/>
+
+        <!-- properties for deployment to Artifactory -->
+        <property name="artifactory.url" value="https://www.escidoc.org/artifactory/libs-releases-local" />
+        <!-- build version, user name and password must be given from the command line via -Dbuild.version=... -Dusername=... -Dpassword=... -->
+        <property name="artifactory.user" value="${username}" />
+        <property name="artifactory.password" value="${password}" />
+
 	<!-- 
     <path id="compile.classpath">
       <pathelement path="${lib.axis}"/>
@@ -132,6 +139,7 @@
 		<copy file="src/WEB-INF/web-withoutAuthN.xml" todir="${build.dir}/WEB-INF" />
 		<copy file="src/WEB-INF/web-withAuthN.xml" todir="${build.dir}/WEB-INF" />
 		<copy file="src/WEB-INF/server-config.wsdd" todir="${build.dir}/WEB-INF" />
+		<copy file="src/WEB-INF/jboss-web.xml" todir="${build.dir}/WEB-INF" />
 		<copy file="src/WEB-INF/log4j.xml" todir="${build.dir}/WEB-INF/classes" />
 		<copy todir="${plugin.dir}">
 			<fileset dir="bin"/>
@@ -194,7 +202,7 @@
 		<copy file="lib/axis-1.4.jar" tofile="${build.dir}/WEB-INF/lib/axis-1.4.jar" />
 		<copy file="lib/fedora-client-3.2.1.jar" tofile="${build.dir}/WEB-INF/lib/fedora-client-3.2.1.jar" />
 		<copy file="lib/fedora-messaging-client-3.1.jar" tofile="${build.dir}/WEB-INF/lib/fedora-messaging-client-3.1.jar" />
-		<copy file="lib/fedora-server-3.1.jar" tofile="${build.dir}/WEB-INF/lib/fedora-server-3.1.jar" />
+		<copy file="lib/fedora-server-3.2.1.jar" tofile="${build.dir}/WEB-INF/lib/fedora-server-3.2.1.jar" />
         <copy file="lib/escidoc/common.jar" tofile="${build.dir}/WEB-INF/lib/common.jar" />
 
 		<copy file="lib/fedora-rest-client/fedora-client-0.1.3.jar" tofile="${build.dir}/WEB-INF/lib/fedora-client-0.1.3.jar" />
@@ -327,5 +335,38 @@
 			<test name="${test}"/>
 		</junit>
 	</target>
-    	
+
+
+        <!-- example usage: ant -Dbuild.version=1.4.6 -Dusername=hans -Dpassword=wurst deploy -->
+
+        <target name="deploy" depends="binrelease" description="Deploy war file to local repository and Artifactory">
+                <!-- deploy war -->
+                <artifact:pom id="memorypom" groupId="org.escidoc" artifactId="fedoragsearch_full" version="${build.version}" name="Fedora GSearch for eSciDoc" packaging="war" />
+                <artifact:writepom pomRefId="memorypom" file="${dist.dir}/fedoragsearch_full-${build.version}.pom" />
+                <artifact:pom id="filepom" file="${dist.dir}/fedoragsearch_full-${build.version}.pom" />
+                <artifact:install file="${dist.dir}/${war.name}">
+                        <pom refid="filepom" />
+                </artifact:install>
+                <artifact:deploy file="${dist.dir}/${war.name}">
+                        <remoteRepository url="${artifactory.url}">
+                                <authentication username="${artifactory.user}" password="${artifactory.password}" />
+                        </remoteRepository>
+                        <pom refid="filepom" />
+                </artifact:deploy>
+
+                <!-- deploy sources -->
+                <artifact:pom id="memorypom" groupId="org.escidoc" artifactId="fedoragsearch_src" version="${build.version}" name="Fedora GSearch for eSciDoc (sources)" packaging="zip" />
+                <artifact:writepom pomRefId="memorypom" file="${dist.dir}/fedoragsearch_src-${build.version}.pom" />
+                <artifact:pom id="filepom" file="${dist.dir}/fedoragsearch_src-${build.version}.pom" />
+                <artifact:install file="${dist.dir}/${app.name}-${genericsearch.version}-sources.zip">
+                        <pom refid="filepom" />
+                </artifact:install>
+                <artifact:deploy file="${dist.dir}/${app.name}-${genericsearch.version}-sources.zip">
+                        <remoteRepository url="${artifactory.url}">
+                                <authentication username="${artifactory.user}" password="${artifactory.password}" />
+                        </remoteRepository>
+                        <pom refid="filepom" />
+                </artifact:deploy>
+        </target>
+
 </project>
