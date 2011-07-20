@@ -139,7 +139,6 @@
 		<copy file="src/WEB-INF/web-withoutAuthN.xml" todir="${build.dir}/WEB-INF" />
 		<copy file="src/WEB-INF/web-withAuthN.xml" todir="${build.dir}/WEB-INF" />
 		<copy file="src/WEB-INF/server-config.wsdd" todir="${build.dir}/WEB-INF" />
-		<copy file="src/WEB-INF/jboss-web.xml" todir="${build.dir}/WEB-INF" />
 		<copy file="src/WEB-INF/log4j.xml" todir="${build.dir}/WEB-INF/classes" />
 		<copy todir="${plugin.dir}">
 			<fileset dir="bin"/>
