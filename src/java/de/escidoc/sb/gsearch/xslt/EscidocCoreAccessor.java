@@ -47,11 +47,7 @@ import de.escidoc.core.common.util.service.ConnectionUtility;
 import de.escidoc.core.common.util.stax.StaxParser;
 import de.escidoc.sb.common.Constants;
 import de.escidoc.sb.util.xml.stax.handler.ContainerMembersCountHandler;
-import de.escidoc.sb.util.xml.stax.handler.ContentModelNameHandler;
-import de.escidoc.sb.util.xml.stax.handler.ContextNameHandler;
 import de.escidoc.sb.util.xml.stax.handler.ObjectAttributeHandler;
-import de.escidoc.sb.util.xml.stax.handler.OuHrefHandler;
-import de.escidoc.sb.util.xml.stax.handler.UserNameHandler;
 
 /**
  * Is called from sylesheet that transforms foxml to indexable document. Returns
