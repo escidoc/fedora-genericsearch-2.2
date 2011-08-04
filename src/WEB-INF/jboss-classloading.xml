@@ -20,7 +20,7 @@
   -->
 
 <classloading xmlns="urn:jboss:classloading:1.0"
-              domain="escidoc.war"
+              domain="fedoragsearch.war"
               export-all="NON_EMPTY"
               import-all="true"
               parent-first="false">
