@@ -18,11 +18,6 @@
   ~ and Max-Planck-Gesellschaft zur Foerderung der Wissenschaft e.V. All rights reserved. Use is subject to license
   ~ terms.
   -->
-<jboss-web>
-    <context-root>/</context-root>
-    <class-loading>
-        <loader-repository>
-            org.escidoc:loader=escidocClassLoader
-        </loader-repository>
-    </class-loading>
-</jboss-web>
+<scanning xmlns="urn:jboss:scanning:1.0">
+    <path name="WEB-INF/classes"/>
+</scanning>
