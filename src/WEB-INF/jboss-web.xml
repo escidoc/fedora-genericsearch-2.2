@@ -21,7 +21,7 @@
 <jboss-web>
     <class-loading>
         <loader-repository>
-            org.escidoc:loader=escidocClassLoader
+            org.escidoc.fedoragsearch:loader=fedoragsearch.war
         </loader-repository>
     </class-loading>
 </jboss-web>
