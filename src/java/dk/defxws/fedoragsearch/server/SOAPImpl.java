@@ -9,7 +9,8 @@ package dk.defxws.fedoragsearch.server;
 
 import java.util.Date;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * target for SOAP calls, calls the operationsImpl
@@ -20,7 +21,7 @@ import org.apache.log4j.Logger;
 public class SOAPImpl implements Operations {
     
     private static final Logger logger =
-        Logger.getLogger(SOAPImpl.class);
+        LoggerFactory.getLogger(SOAPImpl.class);
     
     public String gfindObjects(
             String query,

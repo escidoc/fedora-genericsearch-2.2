@@ -38,7 +38,8 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.ProxyHost;
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -123,7 +124,7 @@ public class Config {
     
     private StringBuffer errors = null;
     
-    private final Logger logger = Logger.getLogger(Config.class);
+    private final Logger logger = LoggerFactory.getLogger(Config.class);
 
     /**
      * The configure operation creates a new current Config object.

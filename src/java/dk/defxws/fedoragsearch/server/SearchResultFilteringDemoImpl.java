@@ -20,7 +20,8 @@ import javax.xml.transform.stream.StreamSource;
 
 import dk.defxws.fedoragsearch.server.utils.IOUtils;
 import dk.defxws.fedoragsearch.server.utils.Stream;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -45,7 +46,7 @@ import fedora.server.management.FedoraAPIM;
 public class SearchResultFilteringDemoImpl implements SearchResultFiltering {
     
     private static final Logger logger =
-        Logger.getLogger(SearchResultFilteringDemoImpl.class);
+        LoggerFactory.getLogger(SearchResultFilteringDemoImpl.class);
 
     private static final Map fedoraClients = new HashMap();
     

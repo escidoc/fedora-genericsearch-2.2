@@ -33,7 +33,8 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
 import dk.defxws.fedoragsearch.server.utils.Stream;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import dk.defxws.fedoragsearch.server.errors.ConfigException;
 import dk.defxws.fedoragsearch.server.errors.GenericSearchException;
@@ -47,7 +48,7 @@ import dk.defxws.fedoragsearch.server.errors.GenericSearchException;
 public class GTransformer {
     
     private static final Logger logger =
-        Logger.getLogger(GTransformer.class);
+        LoggerFactory.getLogger(GTransformer.class);
     
     public GTransformer() {
     }

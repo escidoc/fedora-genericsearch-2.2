@@ -39,7 +39,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.http.impl.cookie.BasicClientCookie;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 import de.escidoc.core.common.util.configuration.EscidocConfiguration;
@@ -71,7 +72,7 @@ public class EscidocCoreAccessor {
 
     static {
         log =
-            Logger
+            LoggerFactory
                 .getLogger(
                 de.escidoc.sb.gsearch.xslt.EscidocCoreAccessor.class);
     }
@@ -154,7 +155,7 @@ public class EscidocCoreAccessor {
         }
         catch (Exception e) {
             log.error("object with uri " + restUri + " not found");
-            log.error(e);
+            log.error("", e);
         }
         return "";
     }
@@ -232,7 +233,7 @@ public class EscidocCoreAccessor {
         }
         catch (Exception e) {
             log.error("object with uri " + restUri + " not found");
-            log.error(e);
+            log.error("", e);
         }
         return "";
     }
@@ -285,7 +286,7 @@ public class EscidocCoreAccessor {
         catch (Exception e) {
             log.error("couldnt retrieve member-list for container " 
                                     + containerObjid);
-            log.error(e);
+            log.error("", e);
         }
         return "";
     }

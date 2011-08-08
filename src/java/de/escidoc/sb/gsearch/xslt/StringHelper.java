@@ -33,7 +33,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.axis.utils.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.NodeList;
 
 /**
@@ -64,7 +65,7 @@ public class StringHelper {
 
     static {
         log =
-            Logger
+            LoggerFactory
                 .getLogger(
                 de.escidoc.sb.gsearch.xslt.StringHelper.class);
     }

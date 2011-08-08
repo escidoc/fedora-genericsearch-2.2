@@ -26,7 +26,8 @@ import javax.xml.transform.stream.StreamSource;
 import dk.defxws.fedoragsearch.server.utils.IOUtils;
 import dk.defxws.fedoragsearch.server.utils.Stream;
 import org.apache.axis.AxisFault;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.yourmediashelf.fedora.client.FedoraClientException;
 import com.yourmediashelf.fedora.client.FedoraCredentials;
@@ -60,7 +61,7 @@ import fedora.server.types.gen.MIMETypedStream;
 public class GenericOperationsImpl implements Operations {
     
     private static final Logger logger =
-        Logger.getLogger(GenericOperationsImpl.class);
+        LoggerFactory.getLogger(GenericOperationsImpl.class);
 
     private static final Map fedoraClients = new HashMap();
 

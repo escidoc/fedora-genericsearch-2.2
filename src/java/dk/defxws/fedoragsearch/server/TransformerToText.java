@@ -18,7 +18,6 @@ import java.io.UnsupportedEncodingException;
 
 import javax.xml.transform.stream.StreamSource;
 
-import org.apache.log4j.Logger;
 import org.apache.lucene.demo.html.HTMLParser;
 import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.encryption.DocumentEncryption;
@@ -28,6 +27,8 @@ import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.util.PDFTextStripper;
 import org.apache.poi.hwpf.extractor.WordExtractor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.escidoc.sb.common.Constants;
 import dk.defxws.fedoragsearch.server.errors.GenericSearchException;
@@ -43,7 +44,7 @@ import dk.defxws.fedoragsearch.server.utils.Stream;
 public final class TransformerToText {
     
     private static final Logger logger =
-        Logger.getLogger(TransformerToText.class);
+        LoggerFactory.getLogger(TransformerToText.class);
     
     public static final String[] handledMimeTypes = { "text/plain", "text/xml",
         "text/html", "application/xml", "application/pdf",
@@ -73,7 +74,7 @@ public final class TransformerToText {
         } catch (Exception e) {
             if (Boolean.parseBoolean(
                 Config.getCurrentConfig().getIgnoreTextExtractionErrors())) {
-                logger.warn(e);
+                logger.warn("", e);
                 return createErrorStream("textfromfilenotextractable");
             } else {
                 throw new GenericSearchException(e.toString());
@@ -190,7 +191,7 @@ throws GenericSearchException {
         } catch (IOException e) {
             closeCOSDocument(cosDoc);
             if (errorFlag) {
-            	logger.warn(e);
+            	logger.warn("", e);
                 return createErrorStream("textfrompdffilenotextractable");
             } else {
                 throw new GenericSearchException("Cannot parse PDF document", e);
@@ -206,7 +207,7 @@ throws GenericSearchException {
         } catch (CryptographyException e) {
             closeCOSDocument(cosDoc);
             if (errorFlag) {
-            	logger.warn(e);
+            	logger.warn("", e);
                 return createErrorStream("textfrompdffilenotextractable");
             } else {
                 throw new GenericSearchException("Cannot decrypt PDF document",
@@ -215,7 +216,7 @@ throws GenericSearchException {
         } catch (InvalidPasswordException e) {
             closeCOSDocument(cosDoc);
             if (errorFlag) {
-            	logger.warn(e);
+            	logger.warn("", e);
                 return createErrorStream("textfrompdffilenotextractable");
             } else {
                 throw new GenericSearchException("Cannot decrypt PDF document",
@@ -224,7 +225,7 @@ throws GenericSearchException {
         } catch (IOException e) {
             closeCOSDocument(cosDoc);
             if (errorFlag) {
-            	logger.warn(e);
+            	logger.warn("", e);
                 return createErrorStream("textfrompdffilenotextractable");
             } else {
                 throw new GenericSearchException("Cannot decrypt PDF document",
@@ -241,7 +242,7 @@ throws GenericSearchException {
         } catch (Exception e) {
             closeCOSDocument(cosDoc);
             if (errorFlag) {
-            	logger.warn(e);
+            	logger.warn("", e);
                 return createErrorStream("textfrompdffilenotextractable");
             } else {
                 throw new GenericSearchException(
@@ -266,7 +267,7 @@ throws GenericSearchException {
             docText.lock();
         } catch (Exception e) {
             if (errorFlag) {
-            	logger.warn(e);
+            	logger.warn("", e);
                 return createErrorStream("textfrompdffilenotextractable");
             } else {
                 throw new GenericSearchException(
@@ -372,7 +373,7 @@ throws GenericSearchException {
             fileIn.close();
         } catch (Exception e) {
             if (errorFlag) {
-            	logger.warn(e);
+            	logger.warn("", e);
                 return createErrorStream("textfrompdffilenotextractable");
             } else {
                 throw new GenericSearchException(

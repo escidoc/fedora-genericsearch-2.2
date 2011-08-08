@@ -46,7 +46,6 @@
       <pathelement path="${lib.fedora-messaging-client}"/>
       <pathelement path="${lib.jaxrpc}"/>
       <pathelement path="${lib.junit}"/>
-      <pathelement path="${lib.log4j}"/>
       <pathelement path="${lib.lucene}"/>
       <pathelement path="${lib.lucene-demos}"/>
       <pathelement path="${lib.pdfbox}"/>
@@ -197,7 +196,6 @@
         <!--ant dir="../FgsConfig" target="prep" inheritAll="false"/-->
 		<delete file="${build.dir}/WEB-INF/web.xml" />
 		<copy file="src/WEB-INF/web-withoutAuthN.xml" tofile="${build.dir}/WEB-INF/web.xml" />
-        <copy file="lib/log4j-1.2.15.jar" tofile="${build.dir}/WEB-INF/lib/log4j-1.2.15.jar" />
 		<copy file="lib/axis-1.4.jar" tofile="${build.dir}/WEB-INF/lib/axis-1.4.jar" />
 		<copy file="lib/fedora-client-3.2.1.jar" tofile="${build.dir}/WEB-INF/lib/fedora-client-3.2.1.jar" />
 		<copy file="lib/fedora-messaging-client-3.1.jar" tofile="${build.dir}/WEB-INF/lib/fedora-messaging-client-3.1.jar" />
