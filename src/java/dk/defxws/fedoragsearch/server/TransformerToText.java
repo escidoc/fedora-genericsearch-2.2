@@ -14,15 +14,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 import java.io.UnsupportedEncodingException;
 
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.stream.StreamSource;
 
-import dk.defxws.fedoragsearch.server.utils.IOUtils;
-import dk.defxws.fedoragsearch.server.utils.Stream;
 import org.apache.log4j.Logger;
 import org.apache.lucene.demo.html.HTMLParser;
 import org.apache.pdfbox.cos.COSDocument;
@@ -32,10 +27,12 @@ import org.apache.pdfbox.exceptions.InvalidPasswordException;
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.util.PDFTextStripper;
-import org.apache.poi.hssf.record.formula.functions.Input;
 import org.apache.poi.hwpf.extractor.WordExtractor;
 
+import de.escidoc.sb.common.Constants;
 import dk.defxws.fedoragsearch.server.errors.GenericSearchException;
+import dk.defxws.fedoragsearch.server.utils.IOUtils;
+import dk.defxws.fedoragsearch.server.utils.Stream;
 
 /**
  * performs transformations from formatted documents to text
@@ -101,7 +98,7 @@ private static Stream getTextFromXML(InputStream doc)
 throws GenericSearchException {
     InputStreamReader isr = null;
     try {
-        isr = new InputStreamReader(doc, "UTF-8");
+        isr = new InputStreamReader(doc, Constants.XML_CHARACTER_ENCODING);
     } catch (UnsupportedEncodingException e) {
         throw new GenericSearchException("encoding exception", e);
     }
@@ -141,7 +138,7 @@ throws GenericSearchException {
             }
             // TODO: Unterstützt WordExtractor keine Stream?
             Stream stream = new Stream();
-            stream.write(buffer.toString().getBytes("UTF-8"));
+            stream.write(buffer.toString().getBytes(Constants.XML_CHARACTER_ENCODING));
             stream.lock();
             return stream;
         } catch (Exception e) {
@@ -239,7 +236,7 @@ throws GenericSearchException {
         try {
             PDFTextStripper stripper = new PDFTextStripper();
             // TODO: Unterstützt PDFTextStripper keine Streams?
-            docText.write(stripper.getText(new PDDocument(cosDoc)).getBytes());
+            docText.write(stripper.getText(new PDDocument(cosDoc)).getBytes(Constants.XML_CHARACTER_ENCODING));
             docText.lock();
         } catch (Exception e) {
             closeCOSDocument(cosDoc);
@@ -265,7 +262,7 @@ throws GenericSearchException {
 //            for (int i = 1; i <= reader.getNumberOfPages(); i++) {
 //                docText.append(PdfTextExtractor.getTextFromPage(reader, i)).append(" ");
 //            }
-        	docText.write(" ".getBytes("UTF-8")); // TODO: Warum ist der obere Code auskommentiert?
+        	docText.write(" ".getBytes(Constants.XML_CHARACTER_ENCODING)); // TODO: Warum ist der obere Code auskommentiert?
             docText.lock();
         } catch (Exception e) {
             if (errorFlag) {
@@ -330,9 +327,9 @@ throws GenericSearchException {
 
             //wait until process is finished
             stdIn = new BufferedReader(
-                    new InputStreamReader(p.getInputStream()));
+                    new InputStreamReader(p.getInputStream(), Constants.XML_CHARACTER_ENCODING));
             errIn = new BufferedReader(
-                    new InputStreamReader(p.getErrorStream()));
+                    new InputStreamReader(p.getErrorStream(), Constants.XML_CHARACTER_ENCODING));
             StringBuffer errBuf = new StringBuffer("");
             long time = System.currentTimeMillis();
             while (true) {
@@ -365,11 +362,11 @@ throws GenericSearchException {
             //read textfile
             fileIn = new FileInputStream(outputFileName);            
             in = new BufferedReader(
-                    new InputStreamReader(fileIn, "UTF-8"));
+                    new InputStreamReader(fileIn, Constants.XML_CHARACTER_ENCODING));
             String str = new String("");
             while ((str = in.readLine()) != null) {
-                textBuffer.write(str.getBytes("UTF-8"));
-                textBuffer.write(" ".getBytes("UFT-8")); // TODO: Wofür sind Spaces nötig?
+                textBuffer.write(str.getBytes(Constants.XML_CHARACTER_ENCODING));
+                textBuffer.write(" ".getBytes(Constants.XML_CHARACTER_ENCODING)); // TODO: Wofür sind Spaces nötig?
             }
             textBuffer.lock();
             fileIn.close();
@@ -452,7 +449,7 @@ throws GenericSearchException {
     private static Stream createErrorStream(String errorMessage) throws GenericSearchException {
         Stream errorStream = new Stream();
         try {
-            errorStream.write(errorMessage.getBytes("UTF-8"));
+            errorStream.write(errorMessage.getBytes(Constants.XML_CHARACTER_ENCODING));
             errorStream.lock();
         } catch(IOException e) {
             throw new GenericSearchException(e.toString());
