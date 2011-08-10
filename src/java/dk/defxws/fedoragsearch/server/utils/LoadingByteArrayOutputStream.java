@@ -1,8 +1,6 @@
 package dk.defxws.fedoragsearch.server.utils;
 
 
-import dk.defxws.fedoragsearch.server.utils.IOUtils;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 

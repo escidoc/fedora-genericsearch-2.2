@@ -7,14 +7,16 @@
  */
 package dk.defxws.fedoragsearch.server;
 
-import java.io.BufferedReader;
+import static com.yourmediashelf.fedora.client.FedoraClient.export;
+import static com.yourmediashelf.fedora.client.FedoraClient.getDatastreamDissemination;
+import static com.yourmediashelf.fedora.client.FedoraClient.getDissemination;
+import static com.yourmediashelf.fedora.client.FedoraClient.listDatastreams;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.rmi.RemoteException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -23,9 +25,6 @@ import java.util.StringTokenizer;
 
 import javax.xml.transform.stream.StreamSource;
 
-import dk.defxws.fedoragsearch.server.utils.IOUtils;
-import dk.defxws.fedoragsearch.server.utils.Stream;
-import org.apache.axis.AxisFault;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,21 +35,15 @@ import com.yourmediashelf.fedora.client.response.FedoraResponse;
 import com.yourmediashelf.fedora.client.response.ListDatastreamsResponse;
 import com.yourmediashelf.fedora.generated.access.DatastreamType;
 
-import static com.yourmediashelf.fedora.client.FedoraClient.listDatastreams;
-import static com.yourmediashelf.fedora.client.FedoraClient.getDatastreamDissemination;
-import static com.yourmediashelf.fedora.client.FedoraClient.getDissemination;
-import static com.yourmediashelf.fedora.client.FedoraClient.export;
-
-import de.escidoc.core.common.exceptions.system.SystemException;
 import dk.defxws.fedoragsearch.server.errors.ConfigException;
 import dk.defxws.fedoragsearch.server.errors.FedoraObjectNotFoundException;
 import dk.defxws.fedoragsearch.server.errors.GenericSearchException;
+import dk.defxws.fedoragsearch.server.utils.IOUtils;
+import dk.defxws.fedoragsearch.server.utils.Stream;
 import fedora.client.FedoraClient;
 import fedora.common.Constants;
 import fedora.server.access.FedoraAPIA;
 import fedora.server.management.FedoraAPIM;
-import fedora.server.types.gen.Datastream;
-import fedora.server.types.gen.MIMETypedStream;
 
 /**
  * performs the generic parts of the operations

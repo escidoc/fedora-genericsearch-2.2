@@ -9,7 +9,6 @@
 	<classpathentry kind="lib" path="lib/jsr173_1.0_api.jar"/>
 	<classpathentry kind="lib" path="lib/junit-4.5.jar"/>
 	<classpathentry kind="lib" path="lib/lib.properties"/>
-	<classpathentry kind="lib" path="lib/log4j-1.2.15.jar"/>
 	<classpathentry kind="lib" path="lib/mail.jar"/>
 	<classpathentry kind="lib" path="lib/saaj-api-1.3.jar"/>
 	<classpathentry kind="lib" path="lib/servlet-api.jar"/>
@@ -32,16 +31,12 @@
 	<classpathentry kind="lib" path="lib/escidoc/woodstox/stax2-2.1.jar"/>
 	<classpathentry kind="lib" path="lib/escidoc/woodstox/wstx-asl-3.2.9.jar"/>
 	<classpathentry kind="lib" path="lib/escidoc/commons-pool-1.5.4.jar"/>
-	<classpathentry kind="lib" path="lib/escidoc/jcl-over-slf4j-1.5.11.jar"/>
-	<classpathentry kind="lib" path="lib/escidoc/slf4j-api-1.5.11.jar"/>
-	<classpathentry kind="lib" path="lib/escidoc/slf4j-log4j12-1.5.11.jar"/>
 	<classpathentry kind="lib" path="lib/abdera-bundle-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/activation-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/axis-1.4.jar"/>
 	<classpathentry kind="lib" path="lib/commons-codec-1.4.jar"/>
 	<classpathentry kind="lib" path="lib/commons-discovery-0.4.jar"/>
 	<classpathentry kind="lib" path="lib/fedora-messaging-client-3.1.jar"/>
-	<classpathentry kind="lib" path="lib/fedora-server-3.1.jar"/>
 	<classpathentry kind="lib" path="lib/trippi-1.4.1-core.jar"/>
 	<classpathentry kind="lib" path="lib/trippi-1.4.1-mptstore.jar"/>
 	<classpathentry kind="lib" path="lib/wsdl4j-1.6.2.jar"/>
@@ -54,5 +49,6 @@
 	<classpathentry kind="lib" path="lib/lucene-core-3.3.0.jar"/>
 	<classpathentry kind="lib" path="lib/lucene-highlighter-3.3.0.jar"/>
 	<classpathentry kind="lib" path="lib/pdfbox-1.6.0.jar"/>
+	<classpathentry kind="lib" path="lib/escidoc/slf4j-api-1.6.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

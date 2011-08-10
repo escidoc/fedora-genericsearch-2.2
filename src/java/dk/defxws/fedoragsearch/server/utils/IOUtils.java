@@ -1,17 +1,17 @@
 package dk.defxws.fedoragsearch.server.utils;
 
-import dk.defxws.fedoragsearch.server.errors.GenericSearchException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import dk.defxws.fedoragsearch.server.errors.GenericSearchException;
 
 public final class IOUtils {
 
