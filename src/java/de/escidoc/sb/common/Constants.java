@@ -32,12 +32,16 @@ package de.escidoc.sb.common;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.lucene.util.Version;
+
 /**
  * Constants for Search and Browse.
  * 
  * @author MIH
  */
 public class Constants {
+
+    public static final Version LUCENE_VERSION = Version.LUCENE_33;
 
     public static final String XML_CHARACTER_ENCODING = "UTF-8";
 
