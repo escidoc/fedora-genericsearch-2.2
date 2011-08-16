@@ -291,14 +291,14 @@ throws GenericSearchException {
         Process p = null;
         try {
             long currMillies = System.currentTimeMillis();
-            String catalinaHome = System.getProperty("catalina.home");
-            if (catalinaHome != null) {
-                catalinaHome += "/";
+            String escidocHome = System.getProperty("ESCIDOC_HOME");
+            if (escidocHome != null) {
+                escidocHome += "/";
             } else {
-                catalinaHome = "";
+                escidocHome = "";
             }
-            inputFileName = catalinaHome + currMillies + ".pdf";
-            outputFileName = catalinaHome + currMillies + ".txt";
+            inputFileName = escidocHome + currMillies + ".pdf";
+            outputFileName = escidocHome + currMillies + ".txt";
 
             //write pdf-bytes to file
             File f = new File(inputFileName);

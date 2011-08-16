@@ -11,7 +11,7 @@
   
   <appender name="FILEOUT" class="org.apache.log4j.DailyRollingFileAppender">
     <param name="datePattern" value="'.'yyyy-MM-dd" />
-    <param name="File" value="${catalina.home}/log/fedoragsearch.log"/>
+    <param name="File" value="${ESCIDOC_HOME}/log/fedoragsearch.log"/>
     <layout class="org.apache.log4j.PatternLayout">
       <param name="ConversionPattern" value="%p %d (%c{1}) %m%n"/>
     </layout>
@@ -19,7 +19,7 @@
   
 <!--appender name="SEARCHFILEOUT" class="org.apache.log4j.DailyRollingFileAppender">
     <param name="datePattern" value="'.'yyyy-MM-dd" />
-    <param name="File" value="${catalina.home}/log/gsearch.log"/>
+    <param name="File" value="${ESCIDOC_HOME}/log/gsearch.log"/>
     <layout class="org.apache.log4j.PatternLayout">
       <param name="ConversionPattern" value="%p %d (%c{1}) %m%n"/>
     </layout>
