@@ -9,6 +9,8 @@ package dk.defxws.fedoragsearch.server;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
@@ -179,8 +181,20 @@ public class Config {
     public static String getDefaultConfigName() throws ConfigException{
         if (defaultConfigName == null) {
             try {
-                defaultConfigName = EscidocConfiguration.getInstance()
+            	defaultConfigName = EscidocConfiguration.getInstance()
                 .get(EscidocConfiguration.SEARCH_PROPERTIES_DIRECTORY, "search/config");
+                if (!defaultConfigName.equals("")) {
+                	String escidocHome = EscidocConfiguration.getInstance().getEscidocHome();
+                	if (!escidocHome.isEmpty()) {
+                		if (!escidocHome.endsWith("/") && !defaultConfigName.startsWith("/")) {
+                			escidocHome += "/";
+                		}
+                		defaultConfigName = escidocHome + defaultConfigName;
+                	}
+                	if (!defaultConfigName.endsWith("/")) {
+                		defaultConfigName += "/";
+                	}
+                }
             } catch (IOException e) {
                 throw new ConfigException(e.getMessage());
             }
@@ -198,12 +212,16 @@ public class Config {
         
 //      Get fedoragsearch properties
         try {
-            InputStream propStream = Config.class
-            .getResourceAsStream("/"+configName+"/fedoragsearch.properties");
-            if (propStream == null) {
-                throw new ConfigException(
-                "*** "+configName+"/fedoragsearch.properties not found in classpath");
-            }
+        	InputStream propStream;
+        	try {
+                propStream = new FileInputStream(configName + "fedoragsearch.properties");
+        	} catch (FileNotFoundException e) {
+                propStream = Config.class.getResourceAsStream("/"+configName+"/fedoragsearch.properties");
+                if (propStream == null) {
+                    throw new ConfigException(
+                    "*** "+configName+"fedoragsearch.properties not found in classpath");
+                }
+        	}
             fgsProps = new Properties();
             fgsProps.load(propStream);
             propStream.close();
