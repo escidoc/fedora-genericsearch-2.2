@@ -150,7 +150,7 @@ public class SearchResultFilteringDemoImpl implements SearchResultFiltering {
 			}
 		}
 		gfindObjectsElement.setAttribute("hitsDenied", Integer.toString(hitsDenied));
-        String xsltPath = config.getConfigName()+"/index/"+config.getIndexName(null)+"/copyXml";
+        String xsltPath = "/index/"+config.getIndexName(null)+"/copyXml";
         Stream stream = (new GTransformer()).transform(
         		xsltPath,
         		new DOMSource(document),

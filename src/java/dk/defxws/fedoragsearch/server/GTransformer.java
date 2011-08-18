@@ -61,17 +61,20 @@ public class GTransformer {
     public Transformer getTransformer(String xsltPath, URIResolver uriResolver) 
     throws ConfigException {
         Transformer transformer = null;
-        String xsltPathName = "/"+xsltPath+".xslt";
+        String relativeXsltPath = xsltPath;
+        if (!relativeXsltPath.startsWith("/")) {
+        	relativeXsltPath = "/" + relativeXsltPath;
+        }
         try {
             InputStream stylesheet = null;
             //MIH: if xsltPath starts with http, get stylesheet from url
             if (xsltPath.startsWith("http")) {
                 stylesheet = Config.getCurrentConfig().getResourceFromUrl(xsltPath);
             } else {
-                stylesheet = Config.class.getResourceAsStream(xsltPathName);
+                stylesheet = Config.getCurrentConfig().getResourceInputStream(relativeXsltPath + ".xslt");
             }
             if (stylesheet==null) {
-                throw new ConfigException(xsltPathName+" not found");
+                throw new ConfigException(relativeXsltPath+" not found");
             }
             TransformerFactory tfactory = TransformerFactory.newInstance();
 

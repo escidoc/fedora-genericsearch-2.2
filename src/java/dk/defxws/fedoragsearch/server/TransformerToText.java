@@ -103,8 +103,7 @@ throws GenericSearchException {
     } catch (UnsupportedEncodingException e) {
         throw new GenericSearchException("encoding exception", e);
     }
-    Stream docText = (new GTransformer()).transform(
-            Config.getDefaultConfigName()+ "/index/textFromXml", 
+    Stream docText = (new GTransformer()).transform("/index/textFromXml", 
             new StreamSource(isr));
     // TODO
     //docText.delete(0, docText.indexOf('>')+1);

@@ -156,7 +156,7 @@ public class RESTImpl extends HttpServlet {
         params[6] = "SRFTYPE";
         params[7] = config.getSearchResultFilteringType();
         Stream stream = (new GTransformer()).transform(
-        				config.getConfigName()+"/rest/"+restXslt,
+        		"/rest/"+restXslt,
         				resultXml, params);
         resultXml = IOUtils.convertStreamToStringBuffer(stream);
 //        if (logger.isDebugEnabled())

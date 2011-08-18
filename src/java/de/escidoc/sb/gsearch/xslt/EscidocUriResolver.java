@@ -35,7 +35,6 @@ import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamSource;
 
-import de.escidoc.core.common.util.configuration.EscidocConfiguration;
 import dk.defxws.fedoragsearch.server.Config;
 import dk.defxws.fedoragsearch.server.URIResolverImpl;
 
@@ -48,21 +47,11 @@ public class EscidocUriResolver extends URIResolverImpl {
             if (href.startsWith("http")) {
                 stylesheet = Config.getCurrentConfig().getResourceFromUrl(href);
             } else {
-                stylesheet = EscidocUriResolver.class.getResourceAsStream(href);
-                if (stylesheet == null) {
-                    String searchPropertiesDirectory = EscidocConfiguration.getInstance()
-                                .get(EscidocConfiguration.SEARCH_PROPERTIES_DIRECTORY, "search/config");
-                    if (searchPropertiesDirectory != null) {
-                        if (!searchPropertiesDirectory.startsWith("/")) {
-                            searchPropertiesDirectory = "/" + searchPropertiesDirectory;
-                        }
-                        if (!href.startsWith("/")) {
-                            searchPropertiesDirectory += "/";
-                        }
-                        stylesheet = EscidocUriResolver.class.getResourceAsStream(
-                                                    searchPropertiesDirectory + href);
-                    }
-                }
+            	String myHref = href;
+            	if (!myHref.startsWith("/")) {
+            		myHref = "/" + myHref;
+            	}
+                stylesheet = Config.getCurrentConfig().getResourceInputStream(myHref);
             }
             if (stylesheet==null) {
                 throw new TransformerException("couldnt find resource");

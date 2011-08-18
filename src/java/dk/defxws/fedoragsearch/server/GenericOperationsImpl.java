@@ -285,17 +285,16 @@ public class GenericOperationsImpl implements Operations {
                     " repositoryName="+repositoryName+
                     " resultPageXslt="+resultPageXslt);
         InputStream repositoryStream =  null;
-        String repositoryInfoPath = "/"+config.getConfigName()+"/repository/"+config.getRepositoryName(repositoryName)+"/repositoryInfo.xml";
+        String repositoryInfoPath = "/repository/"+config.getRepositoryName(repositoryName)+"/repositoryInfo.xml";
         try {
-            repositoryStream =  this.getClass().getResourceAsStream(repositoryInfoPath);
+            repositoryStream =  Config.getCurrentConfig().getResourceInputStream(repositoryInfoPath);
             if (repositoryStream == null) {
                 throw new GenericSearchException("Error "+repositoryInfoPath+" not found in classpath");
             }
         } catch (IOException e) {
             throw new GenericSearchException("Error "+repositoryInfoPath+" not found in classpath", e);
         }
-        String xsltPath = config.getConfigName()
-        		+"/repository/"+config.getRepositoryName(repositoryName)+"/"
+        String xsltPath = "/repository/"+config.getRepositoryName(repositoryName)+"/"
         		+config.getRepositoryInfoResultXslt(repositoryName, resultPageXslt);
         Stream sb = (new GTransformer()).transform(
         		xsltPath,
@@ -803,7 +802,7 @@ public class GenericOperationsImpl implements Operations {
             if (resolvedXsltName.startsWith("http")) {
                 return URLDecoder.decode(resolvedXsltName, "UTF-8");
             } else {
-                return config.getConfigName() + "/index/" + indexName + "/" + resolvedXsltName;
+                return "/index/" + indexName + "/" + resolvedXsltName;
             }
         } catch (Exception e) {
             throw new GenericSearchException(e.toString());

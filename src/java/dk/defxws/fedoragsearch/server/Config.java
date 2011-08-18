@@ -87,6 +87,8 @@ public class Config {
     
     private String configName = null;
     
+    private static String escidocHome = null;
+    
     //MIH use default config-name
     private static String defaultConfigName = null;
     
@@ -138,6 +140,7 @@ public class Config {
     		configName = getDefaultConfigName();
     	}
         currentConfig = new Config(configName);
+        currentConfig.checkConfig();
         configs.put(configName, currentConfig);
     }
 
@@ -161,6 +164,7 @@ public class Config {
         if (currentConfig == null) {
             //MIH use default config-name
             currentConfig = new Config(getDefaultConfigName());
+            currentConfig.checkConfig();
         }
         return currentConfig;
     }
@@ -169,6 +173,7 @@ public class Config {
     	Config config = (Config)configs.get(configName);
         if (config == null) {
         	config = new Config(configName);
+        	config.checkConfig();
             configs.put(configName, config);
         }
         return config;
@@ -181,19 +186,18 @@ public class Config {
     public static String getDefaultConfigName() throws ConfigException{
         if (defaultConfigName == null) {
             try {
-            	defaultConfigName = EscidocConfiguration.getInstance()
+                defaultConfigName = EscidocConfiguration.getInstance()
                 .get(EscidocConfiguration.SEARCH_PROPERTIES_DIRECTORY, "search/config");
-                if (!defaultConfigName.equals("")) {
-                	String escidocHome = EscidocConfiguration.getInstance().getEscidocHome();
-                	if (!escidocHome.isEmpty()) {
-                		if (!escidocHome.endsWith("/") && !defaultConfigName.startsWith("/")) {
-                			escidocHome += "/";
-                		}
-                		defaultConfigName = escidocHome + defaultConfigName;
+                if (!defaultConfigName.startsWith("/")) {
+                	defaultConfigName = "/" + defaultConfigName;
+                }
+                if (!EscidocConfiguration.getInstance().getEscidocHome().isEmpty()) {
+                	escidocHome = EscidocConfiguration.getInstance().getEscidocHome();
+                	if (!escidocHome.endsWith("/")) {
+                		escidocHome += "/";
                 	}
-                	if (!defaultConfigName.endsWith("/")) {
-                		defaultConfigName += "/";
-                	}
+                	escidocHome += "conf";
+                	defaultConfigName = escidocHome + defaultConfigName;
                 }
             } catch (IOException e) {
                 throw new ConfigException(e.getMessage());
@@ -212,16 +216,7 @@ public class Config {
         
 //      Get fedoragsearch properties
         try {
-        	InputStream propStream;
-        	try {
-                propStream = new FileInputStream(configName + "fedoragsearch.properties");
-        	} catch (FileNotFoundException e) {
-                propStream = Config.class.getResourceAsStream("/"+configName+"/fedoragsearch.properties");
-                if (propStream == null) {
-                    throw new ConfigException(
-                    "*** "+configName+"fedoragsearch.properties not found in classpath");
-                }
-        	}
+            InputStream propStream = getResourceInputStream("/fedoragsearch.properties");
             fgsProps = new Properties();
             fgsProps.load(propStream);
             propStream.close();
@@ -244,22 +239,20 @@ public class Config {
             if (defaultRepositoryName == null)
                 defaultRepositoryName = repositoryName;
             try {
-                InputStream propStream = Config.class
-                .getResourceAsStream("/"+configName+"/repository/" + repositoryName + "/repository.properties");
-                if (propStream != null) {
-                    Properties props = new Properties();
-                    props.load(propStream);
-                    propStream.close();
-                    //MIH
-                    convertProperties(props);
-                    if (logger.isInfoEnabled())
-                        logger.info("/"+configName+"/repository/" + repositoryName + "/repository.properties=" + props.toString());
-                    repositoryNameToProps.put(repositoryName, props);
-                }
-                else {
-                    errors.append("\n*** "+configName+"/repository/" + repositoryName
-                            + "/repository.properties not found in classpath");
-                }
+            	InputStream propStream = null;
+            	try {
+                    propStream = getResourceInputStream("/repository/" + repositoryName + "/repository.properties");
+            	} catch (ConfigException e) {
+                    errors.append("\n" + e.getMessage());
+            	}
+                Properties props = new Properties();
+                props.load(propStream);
+                propStream.close();
+                //MIH
+                convertProperties(props);
+                if (logger.isInfoEnabled())
+                    logger.info(configName+"/repository/" + repositoryName + "/repository.properties=" + props.toString());
+                repositoryNameToProps.put(repositoryName, props);
             } catch (IOException e) {
                 errors.append("\n*** Error loading "+configName+"/repository/" + repositoryName
                         + ".properties:\n" + e.toString());
@@ -276,23 +269,21 @@ public class Config {
             if (defaultIndexName == null)
                 defaultIndexName = indexName;
             try {
-                InputStream propStream = Config.class
-                .getResourceAsStream("/"+configName+"/index/" + indexName + "/index.properties");
-                if (propStream != null) {
-                    Properties props = new Properties();
-                    props = new Properties();
-                    props.load(propStream);
-                    propStream.close();
-                    //MIH
-                    convertProperties(props);
-                    if (logger.isInfoEnabled())
-                        logger.info("/"+configName+"/index/" + indexName + "/index.properties=" + props.toString());
-                    indexNameToProps.put(indexName, props);
-                }
-                else {
-                    errors.append("\n*** "+configName+"/index/" + indexName
-                            + "/index.properties not found in classpath");
-                }
+            	InputStream propStream = null;
+            	try {
+                    propStream = getResourceInputStream("/index/" + indexName + "/index.properties");
+            	} catch (ConfigException e) {
+                    errors.append("\n" + e.getMessage());
+            	}
+                Properties props = new Properties();
+                props = new Properties();
+                props.load(propStream);
+                propStream.close();
+                //MIH
+                convertProperties(props);
+                if (logger.isInfoEnabled())
+                    logger.info("/"+configName+"/index/" + indexName + "/index.properties=" + props.toString());
+                indexNameToProps.put(indexName, props);
             } catch (IOException e) {
                 errors.append("\n*** Error loading "+configName+"/index/" + indexName
                         + "/index.properties:\n"+e.toString());
@@ -300,7 +291,6 @@ public class Config {
         }
         if (logger.isDebugEnabled())
             logger.debug("config created configName="+configName+" errors="+errors.toString());
-    	checkConfig();
     }
   
     private void checkConfig() throws ConfigException {
@@ -382,56 +372,54 @@ public class Config {
     		while (updaterNames.hasMoreTokens()) {
     			String updaterName = updaterNames.nextToken();
     			try {
-    				InputStream propStream =
-    					Config.class.getResourceAsStream("/" + configName
-    							+ "/updater/" + updaterName
-    							+ "/updater.properties");
-    				if (propStream != null) {
-    					Properties props = new Properties();
-    					props.load(propStream);
-    					propStream.close();
+                	InputStream propStream = null;
+                	try {
+        				propStream =
+        					getResourceInputStream("/updater/" + updaterName
+        							+ "/updater.properties");
+                	} catch (ConfigException e) {
+                        errors.append("\n" + e.getMessage());
+                	}
+					Properties props = new Properties();
+					props.load(propStream);
+					propStream.close();
 
-    		            //MIH
-    		            convertProperties(props);
-    					if (logger.isInfoEnabled()) {
-    						logger.info("/" + configName + "/updater/"
-    								+ updaterName + "/updater.properties="
-    								+ props.toString());
-    					}
+		            //MIH
+		            convertProperties(props);
+					if (logger.isInfoEnabled()) {
+						logger.info("/" + configName + "/updater/"
+								+ updaterName + "/updater.properties="
+								+ props.toString());
+					}
 
-    					// Check properties
-    					String propsNamingFactory = props.getProperty("java.naming.factory.initial");
-    					String propsProviderUrl = props.getProperty("java.naming.provider.url");
-    					String propsConnFactory = props.getProperty("connection.factory.name");
-    					String propsClientId = props.getProperty("client.id");
+					// Check properties
+					String propsNamingFactory = props.getProperty("java.naming.factory.initial");
+					String propsProviderUrl = props.getProperty("java.naming.provider.url");
+					String propsConnFactory = props.getProperty("connection.factory.name");
+					String propsClientId = props.getProperty("client.id");
 
-    					if(propsNamingFactory == null) {
-    						errors.append("\n*** java.naming.factory.initial not provided in "
-    								+ configName + "/updater/" + updaterName
-    								+ "/updater.properties");
-    					}
-    					if(propsProviderUrl == null) {
-    						errors.append("\n*** java.naming.provider.url not provided in "
-    								+ configName + "/updater/" + updaterName
-    								+ "/updater.properties");
-    					}
-    					if(propsConnFactory == null) {
-    						errors.append("\n*** connection.factory.name not provided in "
-    								+ configName + "/updater/" + updaterName
-    								+ "/updater.properties");
-    					}
-    					if(propsClientId == null) {
-    						errors.append("\n*** client.id not provided in "
-    								+ configName + "/updater/" + updaterName
-    								+ "/updater.properties");
-    					}
+					if(propsNamingFactory == null) {
+						errors.append("\n*** java.naming.factory.initial not provided in "
+								+ configName + "/updater/" + updaterName
+								+ "/updater.properties");
+					}
+					if(propsProviderUrl == null) {
+						errors.append("\n*** java.naming.provider.url not provided in "
+								+ configName + "/updater/" + updaterName
+								+ "/updater.properties");
+					}
+					if(propsConnFactory == null) {
+						errors.append("\n*** connection.factory.name not provided in "
+								+ configName + "/updater/" + updaterName
+								+ "/updater.properties");
+					}
+					if(propsClientId == null) {
+						errors.append("\n*** client.id not provided in "
+								+ configName + "/updater/" + updaterName
+								+ "/updater.properties");
+					}
 
-    					updaterNameToProps.put(updaterName, props);
-    				}
-    				else {
-    					errors.append("\n*** "+configName+"/updater/" + updaterName
-    							+ "/updater.properties not found in classpath");
-    				}
+					updaterNameToProps.put(updaterName, props);
     			} catch (IOException e) {
     				errors.append("\n*** Error loading "+configName+"/updater/" + updaterName
     						+ ".properties:\n" + e.toString());
@@ -749,7 +737,7 @@ public class Config {
     
     private void checkRestStylesheet(String propName) {
         String propValue = fgsProps.getProperty(propName);
-        String configPath = "/"+configName+"/rest/"+propValue+".xslt";
+        String configPath = "/rest/"+propValue+".xslt";
         //MIH: stylesheet-path may be an url
         InputStream stylesheet = null;
         if (propValue.startsWith("http")) {
@@ -757,17 +745,18 @@ public class Config {
                 stylesheet = getResourceFromUrl(propValue);
             } catch (ConfigException e) {}
         } else {
-            stylesheet = Config.class.getResourceAsStream(configPath);
+        	try {
+                stylesheet = getResourceInputStream(configPath);
+        	} catch (ConfigException e) {
+                errors.append("\n" + e.getMessage());
+        	}
         }
-        if (stylesheet==null) {
-            errors.append("\n*** Rest stylesheet "+propName+"="+propValue+" not found");
-        } else
-            checkStylesheet(configPath, stylesheet);
+        checkStylesheet(configPath, stylesheet);
     }
     
     private void checkResultStylesheet(String xsltPath, Properties props, String propName) {
         String propValue = props.getProperty(propName);
-        String configPath = "/"+configName+"/"+xsltPath+"/"+propValue+".xslt";
+        String configPath = "/"+xsltPath+"/"+propValue+".xslt";
         //MIH: stylesheet-path may be an url
         InputStream stylesheet = null;
         if (propValue.startsWith("http")) {
@@ -775,14 +764,13 @@ public class Config {
                 stylesheet = getResourceFromUrl(propValue);
             } catch (ConfigException e) {}
         } else {
-            stylesheet = Config.class.getResourceAsStream(configPath);
+        	try {
+                stylesheet = getResourceInputStream(configPath);
+        	} catch (ConfigException e) {
+                errors.append("\n" + e.getMessage());
+        	}
         }
-        if (stylesheet==null) {
-            errors.append("\n*** Result stylesheet "+configPath + ": " 
-                    + propName + "=" + propValue + " not found");
-        }
-        else
-            checkStylesheet(configPath, stylesheet);
+        checkStylesheet(configPath, stylesheet);
     }
     
     private void checkStylesheet(String configPath, InputStream stylesheet) {
@@ -1476,6 +1464,21 @@ public class Config {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+    }
+    
+    public InputStream getResourceInputStream(final String path) throws ConfigException{
+    	if (escidocHome != null) {
+    		try {
+        		return new FileInputStream(getConfigName() + path);
+    		} catch (FileNotFoundException e) {
+                throw new ConfigException("*** " + path + " not found");
+    		}
+    	}
+    	InputStream in = Config.class.getResourceAsStream(getConfigName() + path);
+    	if (in == null) {
+    		throw new ConfigException("*** " + path + " not found in classpath");
+    	}
+    	return in;
     }
     
 }
