@@ -282,7 +282,7 @@ public class Config {
                 //MIH
                 convertProperties(props);
                 if (logger.isInfoEnabled())
-                    logger.info("/"+configName+"/index/" + indexName + "/index.properties=" + props.toString());
+                    logger.info(configName+"/index/" + indexName + "/index.properties=" + props.toString());
                 indexNameToProps.put(indexName, props);
             } catch (IOException e) {
                 errors.append("\n*** Error loading "+configName+"/index/" + indexName
@@ -387,7 +387,7 @@ public class Config {
 		            //MIH
 		            convertProperties(props);
 					if (logger.isInfoEnabled()) {
-						logger.info("/" + configName + "/updater/"
+						logger.info(configName + "/updater/"
 								+ updaterName + "/updater.properties="
 								+ props.toString());
 					}
@@ -464,7 +464,7 @@ public class Config {
     		String repositoryName = (String)repositoryNames.nextElement();
     		Properties props = (Properties)repositoryNameToProps.get(repositoryName);
             if (logger.isDebugEnabled())
-                logger.debug("/"+configName+"/repository/" + repositoryName + "/repository.properties=" + props.toString());
+                logger.debug(configName+"/repository/" + repositoryName + "/repository.properties=" + props.toString());
     		
 //  		Check for unknown properties, indicating typos or wrong property names
     		String[] reposPropNames = {
@@ -497,7 +497,7 @@ public class Config {
 //    		}
 
 //  		Check result stylesheets
-    		checkResultStylesheet("repository/"+repositoryName, props, "fgsrepository.defaultGetRepositoryInfoResultXslt");
+    		checkResultStylesheet("/repository/"+repositoryName, props, "fgsrepository.defaultGetRepositoryInfoResultXslt");
     	}
 
 //  	Check index properties
@@ -506,7 +506,7 @@ public class Config {
     		String indexName = (String)indexNames.nextElement();
     		Properties props = (Properties)indexNameToProps.get(indexName);
             if (logger.isDebugEnabled())
-                logger.debug("/"+configName+"/index/" + indexName + "/index.properties=" + props.toString());
+                logger.debug(configName+"/index/" + indexName + "/index.properties=" + props.toString());
     		
 //  		Check for unknown properties, indicating typos or wrong property names
     		String[] indexPropNames = {
@@ -578,15 +578,15 @@ public class Config {
     		}
 
 //  		Check result stylesheets
-    		checkResultStylesheet("index/"+indexName, props, 
+    		checkResultStylesheet("/index/"+indexName, props, 
     		"fgsindex.defaultUpdateIndexDocXslt");
-    		checkResultStylesheet("index/"+indexName, props, 
+    		checkResultStylesheet("/index/"+indexName, props, 
     		"fgsindex.defaultUpdateIndexResultXslt");
-    		checkResultStylesheet("index/"+indexName, props, 
+    		checkResultStylesheet("/index/"+indexName, props, 
     		"fgsindex.defaultGfindObjectsResultXslt");
-    		checkResultStylesheet("index/"+indexName, props, 
+    		checkResultStylesheet("/index/"+indexName, props, 
     		"fgsindex.defaultBrowseIndexResultXslt");
-    		checkResultStylesheet("index/"+indexName, props, 
+    		checkResultStylesheet("/index/"+indexName, props, 
     		"fgsindex.defaultGetIndexInfoResultXslt");
 
 //  		Check indexDir
@@ -756,7 +756,7 @@ public class Config {
     
     private void checkResultStylesheet(String xsltPath, Properties props, String propName) {
         String propValue = props.getProperty(propName);
-        String configPath = "/"+xsltPath+"/"+propValue+".xslt";
+        String configPath = xsltPath+"/"+propValue+".xslt";
         //MIH: stylesheet-path may be an url
         InputStream stylesheet = null;
         if (propValue.startsWith("http")) {
