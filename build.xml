@@ -214,6 +214,11 @@
 		<copy todir="${build.dir}/WEB-INF/lib" flatten="true">
 			<fileset dir="lib" excludes="servlet-api.jar"/>
 		</copy>
+		<copy todir="${build.dir}/WEB-INF">
+			<fileset dir="src/WEB-INF">
+				<include name="jboss*"/>
+			</fileset>
+		</copy>
 	    <jar jarfile="${dist.dir}/${war.name}" basedir="${build.dir}"/>
 	</target>
 
