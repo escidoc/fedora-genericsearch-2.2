@@ -22,11 +22,11 @@ import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
+import org.apache.xalan.processor.TransformerFactoryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,18 +76,8 @@ public class GTransformer {
             if (stylesheet==null) {
                 throw new ConfigException(relativeXsltPath+" not found");
             }
-            TransformerFactory tfactory = TransformerFactory.newInstance();
-
-            //MIH: Hardcoded workaround if system-property ////////////////////
-            //javax.xml.transform.TransformerFactory was set 
-            //to stax-impl (pubman does that)
-            //Then set Transformer-Factory to xalan-impl
-            String tFactoryImpl = System.getProperty(
-            "javax.xml.transform.TransformerFactory");
-            if (tFactoryImpl != null
-                    && tFactoryImpl.contains("saxon")) {
-                tfactory = new org.apache.xalan.processor.TransformerFactoryImpl();
-            }
+            //MIH: Explicitly use Xalan Transformer Factory ////////////////////
+        	TransformerFactoryImpl tfactory = new TransformerFactoryImpl();
             ///////////////////////////////////////////////////////////////////
             //MIH: set URIResolver to TransformerFactory and not to Transformer
             if (uriResolver!=null) {

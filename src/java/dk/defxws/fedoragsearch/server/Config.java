@@ -28,7 +28,6 @@ import java.util.regex.Pattern;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamResult;
@@ -40,13 +39,14 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.ProxyHost;
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.methods.GetMethod;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.store.FSDirectory;
+import org.apache.xalan.processor.TransformerFactoryImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.escidoc.core.common.util.configuration.EscidocConfiguration;
 import dk.defxws.fedoragsearch.server.errors.ConfigException;
@@ -778,18 +778,8 @@ public class Config {
             logger.debug("checkStylesheet for " + configPath);
         Transformer transformer = null;
         try {
-            TransformerFactory tfactory = TransformerFactory.newInstance();
-
-            //MIH: Hardcoded workaround if system-property ////////////////////
-            //javax.xml.transform.TransformerFactory was set 
-            //to stax-impl (pubman does that)
-            //Then set Transformer-Factory to xalan-impl
-            String tFactoryImpl = System.getProperty(
-            "javax.xml.transform.TransformerFactory");
-            if (tFactoryImpl != null
-                    && tFactoryImpl.contains("saxon")) {
-                tfactory = new org.apache.xalan.processor.TransformerFactoryImpl();
-            }
+            //MIH: Explicitly use Xalan Transformer Factory ////////////////////
+        	TransformerFactoryImpl tfactory = new TransformerFactoryImpl();
             ///////////////////////////////////////////////////////////////////
             //MIH: add hardcoded EscidocUriResolverto avoid more changes in method-signatures
             tfactory.setURIResolver(new de.escidoc.sb.gsearch.xslt.EscidocUriResolver());
