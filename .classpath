@@ -16,6 +16,9 @@
 	<classpathentry kind="lib" path="lib/sjsxp.jar"/>
 	<classpathentry kind="lib" path="lib/escidoc/woodstox/jsr173_1.0_api.jar"/>
 	<classpathentry kind="lib" path="lib/escidoc/escidoc-analyzers.jar"/>
+	<classpathentry kind="lib" path="lib/escidoc/poi-3.0-alpha3-20070323.jar"/>
+	<classpathentry kind="lib" path="lib/escidoc/poi-contrib-3.0-alpha3-20070323.jar"/>
+	<classpathentry kind="lib" path="lib/escidoc/poi-scratchpad-3.0-alpha3-20070323.jar"/>
 	<classpathentry kind="lib" path="lib/escidoc/sen.jar"/>
 	<classpathentry kind="lib" path="lib/activemq-all-5.4.0.jar"/>
 	<classpathentry kind="lib" path="lib/commons-httpclient-3.1.jar"/>
@@ -51,10 +54,5 @@
 	<classpathentry kind="lib" path="lib/lucene-highlighter-3.1.0.jar"/>
 	<classpathentry kind="lib" path="lib/escidoc/lucene-analyzers-3.1.0.jar"/>
 	<classpathentry kind="lib" path="lib/lucene-demos-3.0.3.jar"/>
-	<classpathentry kind="lib" path="lib/escidoc/poi-3.8-beta4-20110826.jar"/>
-	<classpathentry kind="lib" path="lib/escidoc/poi-excelant-3.8-beta4-20110826.jar"/>
-	<classpathentry kind="lib" path="lib/escidoc/poi-ooxml-3.8-beta4-20110826.jar"/>
-	<classpathentry kind="lib" path="lib/escidoc/poi-ooxml-schemas-3.8-beta4-20110826.jar"/>
-	<classpathentry kind="lib" path="lib/escidoc/poi-scratchpad-3.8-beta4-20110826.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
