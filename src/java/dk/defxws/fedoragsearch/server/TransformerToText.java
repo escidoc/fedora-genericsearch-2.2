@@ -14,7 +14,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 
 import javax.xml.transform.stream.StreamSource;
 
@@ -27,7 +26,15 @@ import org.apache.pdfbox.exceptions.InvalidPasswordException;
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.util.PDFTextStripper;
+import org.apache.poi.hslf.extractor.PowerPointExtractor;
+import org.apache.poi.hssf.extractor.ExcelExtractor;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hwpf.extractor.WordExtractor;
+import org.apache.poi.openxml4j.opc.OPCPackage;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.xslf.extractor.XSLFPowerPointExtractor;
+import org.apache.poi.xssf.extractor.XSSFExcelExtractor;
+import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
 
 import de.escidoc.sb.common.Constants;
 import dk.defxws.fedoragsearch.server.errors.GenericSearchException;
@@ -47,7 +54,42 @@ public final class TransformerToText {
     
     public static final String[] handledMimeTypes = { "text/plain", "text/xml",
         "text/html", "application/xml", "application/pdf",
-        "application/msword" };
+        "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "application/vnd.ms-powerpoint", "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"};
+    
+    private static final String genericTextExtractionErrorString = " textnotextractable";
+    
+    private static final String textTextExtractionErrorString = 
+    	"textfromtextfilenotextractable" + genericTextExtractionErrorString;
+    
+    private static final String xmlTextExtractionErrorString = 
+    	"textfromxmlfilenotextractable" + genericTextExtractionErrorString;
+    
+    private static final String htmlTextExtractionErrorString = 
+    	"textfromhtmlfilenotextractable" + genericTextExtractionErrorString;
+    
+    private static final String pdfTextExtractionErrorString = 
+    	"textfrompdffilenotextractable" + genericTextExtractionErrorString;
+    
+    private static final String docTextExtractionErrorString = 
+    	"textfromdocfilenotextractable" + genericTextExtractionErrorString;
+    
+    private static final String docxTextExtractionErrorString = 
+    	"textfromdocxfilenotextractable" + genericTextExtractionErrorString;
+    
+    private static final String pptTextExtractionErrorString = 
+    	"textfrompptfilenotextractable" + genericTextExtractionErrorString;
+    
+    private static final String pptxTextExtractionErrorString = 
+    	"textfrompptxfilenotextractable" + genericTextExtractionErrorString;
+    
+    private static final String xlsTextExtractionErrorString = 
+    	"textfromxlsfilenotextractable" + genericTextExtractionErrorString;
+    
+    private static final String xlsxTextExtractionErrorString = 
+    	"textfromxlsxfilenotextractable" + genericTextExtractionErrorString;
+    
     
     private TransformerToText() {
     }
@@ -65,9 +107,19 @@ public final class TransformerToText {
             } else if (mimetype.equals("application/pdf")) {
                 return getTextFromPDF(doc);
             } else if (mimetype.equals("application/ps")) {
-                return new Stream(); // TODO: Warum is dies nötig?
+                return new Stream();
             } else if (mimetype.equals("application/msword")) {
                 return getTextFromDOC(doc);
+            } else if (mimetype.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document")) {
+                return getTextFromDOCX(doc);
+            } else if (mimetype.equals("application/vnd.ms-powerpoint")) {
+                return getTextFromPPT(doc);
+            } else if (mimetype.equals("application/vnd.openxmlformats-officedocument.presentationml.presentation")) {
+                return getTextFromPPTX(doc);
+            } else if (mimetype.equals("application/vnd.ms-excel")) {
+                return getTextFromXLS(doc);
+            } else if (mimetype.equals("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) {
+                return getTextFromXLSX(doc);
             } else
                 return new Stream();
         } catch (Exception e) {
@@ -83,70 +135,219 @@ public final class TransformerToText {
 
     private static Stream getTextFromText(InputStream input)
     throws GenericSearchException {
+        boolean errorFlag = Boolean.parseBoolean(
+                Config.getCurrentConfig().getIgnoreTextExtractionErrors());
         Stream docText = new Stream();
         try {
             IOUtils.copy(input, docText);
             docText.lock();
         } catch(IOException e) {
-            throw new GenericSearchException(e.toString());
+            if (errorFlag) {
+            	logger.warn("", e);
+                return createErrorStream(textTextExtractionErrorString);
+            } else {
+                throw new GenericSearchException(e.toString());
+            }
         }
         return docText;
     }
 
 
-private static Stream getTextFromXML(InputStream doc)
-throws GenericSearchException {
-    InputStreamReader isr = null;
-    try {
-        isr = new InputStreamReader(doc, Constants.XML_CHARACTER_ENCODING);
-    } catch (UnsupportedEncodingException e) {
-        throw new GenericSearchException("encoding exception", e);
-    }
-    Stream docText = (new GTransformer()).transform(
-            Config.getDefaultConfigName()+ "/index/textFromXml", 
-            new StreamSource(isr));
-    // TODO
-    //docText.delete(0, docText.indexOf('>')+1);
-    return docText;
-}
+	private static Stream getTextFromXML(InputStream doc)
+			throws GenericSearchException {
+        boolean errorFlag = Boolean.parseBoolean(
+                Config.getCurrentConfig().getIgnoreTextExtractionErrors());
+		InputStreamReader isr = null;
+		Stream docText;
+		try {
+			isr = new InputStreamReader(doc, "UTF-8");
+			docText = (new GTransformer()).transform("/index/textFromXml",
+					new StreamSource(isr));
+			// TODO
+			// docText.delete(0, docText.indexOf('>')+1);
+		} catch (Exception e) {
+            if (errorFlag) {
+            	logger.warn("", e);
+                return createErrorStream(xmlTextExtractionErrorString);
+            } else {
+                throw new GenericSearchException(e.toString());
+            }
+		}
+		return docText;
+	}
 
     private static Stream getTextFromHTML(InputStream doc)
     throws GenericSearchException {
+        boolean errorFlag = Boolean.parseBoolean(
+                Config.getCurrentConfig().getIgnoreTextExtractionErrors());
         Stream docText = new Stream();
-        HTMLParser htmlParser = new HTMLParser(doc);
         try {
+            HTMLParser htmlParser = new HTMLParser(doc);
             IOUtils.copy(htmlParser.getReader(), docText);
             docText.lock();
-        } catch (IOException e) {
-            throw new GenericSearchException(e.toString());
+        } catch (Exception e) {
+            if (errorFlag) {
+            	logger.warn("", e);
+                return createErrorStream(htmlTextExtractionErrorString);
+            } else {
+                throw new GenericSearchException(e.toString());
+            }
         }
         return docText;
     }
 
     private static Stream getTextFromDOC(InputStream doc)
             throws GenericSearchException {
-        WordExtractor wd = null;
+        boolean errorFlag = Boolean.parseBoolean(
+                Config.getCurrentConfig().getIgnoreTextExtractionErrors());
+        WordExtractor wordExtractor = null;
         try {
-            wd = new WordExtractor(doc);
-            StringBuffer buffer = new StringBuffer(wd.getText().trim());
-            for (int c = 0; c < buffer.length(); c++) {
-                if (buffer.charAt(c) <= '\u001F'
-                        || buffer.charAt(c) == '\u201C'
-                        || buffer.charAt(c) == '\u201D') {
-                    buffer.setCharAt(c, ' ');
-                }
-            }
-            // TODO: Unterstützt WordExtractor keine Stream?
+    		wordExtractor = new WordExtractor(doc);
+            StringBuffer buffer = new StringBuffer(wordExtractor.getText().trim());
             Stream stream = new Stream();
             stream.write(buffer.toString().getBytes(Constants.XML_CHARACTER_ENCODING));
             stream.lock();
             return stream;
         } catch (Exception e) {
-            throw new GenericSearchException("Cannot parse Word document", e);
+            if (errorFlag) {
+            	logger.warn("", e);
+                return createErrorStream(docTextExtractionErrorString);
+            } else {
+                throw new GenericSearchException("cannot parse doc-file",
+                        e);
+            }
         } finally {
-            wd = null;
+        	wordExtractor = null;
         }
     }
+
+	private static Stream getTextFromDOCX(InputStream doc)
+			throws GenericSearchException {
+		boolean errorFlag = Boolean.parseBoolean(Config.getCurrentConfig()
+				.getIgnoreTextExtractionErrors());
+		XWPFWordExtractor wordExtractor = null;
+		try {
+			wordExtractor = new XWPFWordExtractor(OPCPackage.open(doc));
+	        StringBuffer buffer = new StringBuffer(wordExtractor.getText().trim());
+			Stream stream = new Stream();
+			stream.write(buffer.toString().getBytes(
+					Constants.XML_CHARACTER_ENCODING));
+			stream.lock();
+			return stream;
+		} catch (Exception e) {
+			if (errorFlag) {
+				logger.warn("", e);
+				return createErrorStream(docxTextExtractionErrorString);
+			} else {
+				throw new GenericSearchException("cannot parse docx-file", e);
+			}
+		} finally {
+			wordExtractor = null;
+		}
+	}
+
+	private static Stream getTextFromPPT(InputStream doc)
+			throws GenericSearchException {
+		boolean errorFlag = Boolean.parseBoolean(Config.getCurrentConfig()
+				.getIgnoreTextExtractionErrors());
+		PowerPointExtractor powerPointExtractor = null;
+		try {
+			powerPointExtractor = new PowerPointExtractor(doc);
+	        StringBuffer buffer = new StringBuffer(powerPointExtractor.getText(true, true).trim());
+			Stream stream = new Stream();
+			stream.write(buffer.toString().getBytes(
+					Constants.XML_CHARACTER_ENCODING));
+			stream.lock();
+			return stream;
+		} catch (Exception e) {
+			if (errorFlag) {
+				logger.warn("", e);
+				return createErrorStream(pptTextExtractionErrorString);
+			} else {
+				throw new GenericSearchException("cannot parse ppt-file", e);
+			}
+		} finally {
+			powerPointExtractor = null;
+		}
+	}
+
+	private static Stream getTextFromPPTX(InputStream doc)
+			throws GenericSearchException {
+		boolean errorFlag = Boolean.parseBoolean(Config.getCurrentConfig()
+				.getIgnoreTextExtractionErrors());
+		XSLFPowerPointExtractor powerPointExtractor = null;
+		try {
+			powerPointExtractor = new XSLFPowerPointExtractor(OPCPackage.open(doc));
+	        StringBuffer buffer = new StringBuffer(powerPointExtractor.getText(true, true).trim());
+			Stream stream = new Stream();
+			stream.write(buffer.toString().getBytes(
+					Constants.XML_CHARACTER_ENCODING));
+			stream.lock();
+			return stream;
+		} catch (Exception e) {
+			if (errorFlag) {
+				logger.warn("", e);
+				return createErrorStream(pptxTextExtractionErrorString);
+			} else {
+				throw new GenericSearchException("cannot parse pptx-file", e);
+			}
+		} finally {
+			powerPointExtractor = null;
+		}
+	}
+
+	private static Stream getTextFromXLS(InputStream doc)
+			throws GenericSearchException {
+		boolean errorFlag = Boolean.parseBoolean(Config.getCurrentConfig()
+				.getIgnoreTextExtractionErrors());
+		HSSFWorkbook wb = null;
+		ExcelExtractor excelExtractor = null;
+		try {
+			wb = new HSSFWorkbook(new POIFSFileSystem(doc));
+			excelExtractor = new ExcelExtractor(wb);
+	        StringBuffer buffer = new StringBuffer(excelExtractor.getText().trim());
+			Stream stream = new Stream();
+			stream.write(buffer.toString().getBytes(
+					Constants.XML_CHARACTER_ENCODING));
+			stream.lock();
+			return stream;
+		} catch (Exception e) {
+			if (errorFlag) {
+				logger.warn("", e);
+				return createErrorStream(xlsTextExtractionErrorString);
+			} else {
+				throw new GenericSearchException("cannot parse xls-file", e);
+			}
+		} finally {
+			excelExtractor = null;
+			wb = null;
+		}
+	}
+
+	private static Stream getTextFromXLSX(InputStream doc)
+			throws GenericSearchException {
+		boolean errorFlag = Boolean.parseBoolean(Config.getCurrentConfig()
+				.getIgnoreTextExtractionErrors());
+		XSSFExcelExtractor excelExtractor = null;
+		try {
+			excelExtractor = new XSSFExcelExtractor(OPCPackage.open(doc));
+	        StringBuffer buffer = new StringBuffer(excelExtractor.getText().trim());
+			Stream stream = new Stream();
+			stream.write(buffer.toString().getBytes(
+					Constants.XML_CHARACTER_ENCODING));
+			stream.lock();
+			return stream;
+		} catch (Exception e) {
+			if (errorFlag) {
+				logger.warn("", e);
+				return createErrorStream(xlsxTextExtractionErrorString);
+			} else {
+				throw new GenericSearchException("cannot parse xlsx-file", e);
+			}
+		} finally {
+			excelExtractor = null;
+		}
+	}
 
     private static Stream getTextFromPDF(InputStream doc)
             throws GenericSearchException {
@@ -191,7 +392,7 @@ throws GenericSearchException {
             closeCOSDocument(cosDoc);
             if (errorFlag) {
             	logger.warn(e);
-                return createErrorStream("textfrompdffilenotextractable");
+                return createErrorStream(pdfTextExtractionErrorString);
             } else {
                 throw new GenericSearchException("Cannot parse PDF document", e);
             }
@@ -207,7 +408,7 @@ throws GenericSearchException {
             closeCOSDocument(cosDoc);
             if (errorFlag) {
             	logger.warn(e);
-                return createErrorStream("textfrompdffilenotextractable");
+                return createErrorStream(pdfTextExtractionErrorString);
             } else {
                 throw new GenericSearchException("Cannot decrypt PDF document",
                         e);
@@ -216,7 +417,7 @@ throws GenericSearchException {
             closeCOSDocument(cosDoc);
             if (errorFlag) {
             	logger.warn(e);
-                return createErrorStream("textfrompdffilenotextractable");
+                return createErrorStream(pdfTextExtractionErrorString);
             } else {
                 throw new GenericSearchException("Cannot decrypt PDF document",
                         e);
@@ -225,7 +426,7 @@ throws GenericSearchException {
             closeCOSDocument(cosDoc);
             if (errorFlag) {
             	logger.warn(e);
-                return createErrorStream("textfrompdffilenotextractable");
+                return createErrorStream(pdfTextExtractionErrorString);
             } else {
                 throw new GenericSearchException("Cannot decrypt PDF document",
                         e);
@@ -242,7 +443,7 @@ throws GenericSearchException {
             closeCOSDocument(cosDoc);
             if (errorFlag) {
             	logger.warn(e);
-                return createErrorStream("textfrompdffilenotextractable");
+                return createErrorStream(pdfTextExtractionErrorString);
             } else {
                 throw new GenericSearchException(
                         "Cannot parse PDF document", e);
@@ -267,7 +468,7 @@ throws GenericSearchException {
         } catch (Exception e) {
             if (errorFlag) {
             	logger.warn(e);
-                return createErrorStream("textfrompdffilenotextractable");
+                return createErrorStream(pdfTextExtractionErrorString);
             } else {
                 throw new GenericSearchException(
                         "Cannot parse PDF document", e);
@@ -373,7 +574,7 @@ throws GenericSearchException {
         } catch (Exception e) {
             if (errorFlag) {
             	logger.warn(e);
-                return createErrorStream("textfrompdffilenotextractable");
+                return createErrorStream(pdfTextExtractionErrorString);
             } else {
                 throw new GenericSearchException(
                         "Cannot parse PDF document", e);
