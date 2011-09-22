@@ -237,7 +237,7 @@ public final class TransformerToText {
 		} catch (Exception e) {
 			if (errorFlag) {
 				logger.warn("", e);
-				return createErrorStream(docTextExtractionErrorString);
+				return createErrorStream(docxTextExtractionErrorString);
 			} else {
 				throw new GenericSearchException("cannot parse docx-file", e);
 			}
@@ -262,7 +262,7 @@ public final class TransformerToText {
 		} catch (Exception e) {
 			if (errorFlag) {
 				logger.warn("", e);
-				return createErrorStream(docTextExtractionErrorString);
+				return createErrorStream(pptTextExtractionErrorString);
 			} else {
 				throw new GenericSearchException("cannot parse ppt-file", e);
 			}
@@ -287,7 +287,7 @@ public final class TransformerToText {
 		} catch (Exception e) {
 			if (errorFlag) {
 				logger.warn("", e);
-				return createErrorStream(docTextExtractionErrorString);
+				return createErrorStream(pptxTextExtractionErrorString);
 			} else {
 				throw new GenericSearchException("cannot parse pptx-file", e);
 			}
@@ -314,7 +314,7 @@ public final class TransformerToText {
 		} catch (Exception e) {
 			if (errorFlag) {
 				logger.warn("", e);
-				return createErrorStream(docTextExtractionErrorString);
+				return createErrorStream(xlsTextExtractionErrorString);
 			} else {
 				throw new GenericSearchException("cannot parse xls-file", e);
 			}
@@ -340,7 +340,7 @@ public final class TransformerToText {
 		} catch (Exception e) {
 			if (errorFlag) {
 				logger.warn("", e);
-				return createErrorStream(docTextExtractionErrorString);
+				return createErrorStream(xlsxTextExtractionErrorString);
 			} else {
 				throw new GenericSearchException("cannot parse xlsx-file", e);
 			}
