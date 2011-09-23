@@ -360,6 +360,7 @@ public class GenericOperationsImpl implements Operations {
             String repositoryName)
     throws java.rmi.RemoteException {
         
+        long time = System.currentTimeMillis();
         if (logger.isInfoEnabled())
             logger.info("getFoxmlFromPid" +
                     " pid="+pid +
@@ -404,7 +405,9 @@ public class GenericOperationsImpl implements Operations {
                 out.flush();
                 foxmlRecord = out.toByteArray();
             }
-
+            if (logger.isDebugEnabled()) {
+        		logger.debug("getting foxml needed " + (System.currentTimeMillis() - time));
+            }
         } catch (FedoraClientException e) {
         	throw new FedoraObjectNotFoundException("Fedora Object "+pid+" not found at "+repositoryName, e);
         } catch (IOException e) {
@@ -453,6 +456,7 @@ public class GenericOperationsImpl implements Operations {
     		String trustStorePath,
     		String trustStorePass)
     throws GenericSearchException {
+        long time = System.currentTimeMillis();
         if (logger.isInfoEnabled())
             logger.info("getDatastreamText"
             		+" pid="+pid
@@ -499,7 +503,9 @@ public class GenericOperationsImpl implements Operations {
                 		fedoraPass );
             	response = getDatastreamDissemination(pid, dsId).execute(restClient);
                 mimetype = response.getMimeType();
-
+                if (logger.isDebugEnabled()) {
+            		logger.debug("getting datastream dissemination needed " + (System.currentTimeMillis() - time));
+                }
             } catch (FedoraClientException e) {
                 if (e.getMessage().indexOf("no path")>-1 ||
                         e.getMessage().indexOf("DefaulAccess")>-1)
