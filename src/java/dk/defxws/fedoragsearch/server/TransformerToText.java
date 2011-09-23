@@ -14,6 +14,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.NoSuchElementException;
 
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
@@ -180,14 +181,7 @@ public final class TransformerToText {
                 }
                 reader.next();
             }
-        } catch(IOException e) {
-            if (errorFlag) {
-            	logger.warn("", e);
-                return createErrorStream(xmlTextExtractionErrorString);
-            } else {
-                throw new GenericSearchException(e.toString());
-            }
-        } catch(XMLStreamException e) {
+        } catch(Exception e) {
             if (errorFlag) {
             	logger.warn("", e);
                 return createErrorStream(xmlTextExtractionErrorString);
