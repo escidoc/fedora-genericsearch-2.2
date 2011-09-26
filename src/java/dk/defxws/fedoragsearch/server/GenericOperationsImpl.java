@@ -463,10 +463,7 @@ public class GenericOperationsImpl implements Operations {
             		+" repositoryName="+repositoryName
             		+" dsId="+dsId
             		+" fedoraSoap="+fedoraSoap
-            		+" fedoraUser="+fedoraUser
-            		+" fedoraPass="+fedoraPass
-            		+" trustStorePath="+trustStorePath
-            		+" trustStorePass="+trustStorePass);
+            		+" trustStorePath="+trustStorePath);
         Stream dsBuffer = new Stream();
         String mimetype = "";
     	FedoraResponse response = null;
@@ -563,10 +560,7 @@ public class GenericOperationsImpl implements Operations {
                     +" pid="+pid
             		+" dsMimetypes="+dsMimetypes
             		+" fedoraSoap="+fedoraSoap
-            		+" fedoraUser="+fedoraUser
-            		+" fedoraPass="+fedoraPass
-            		+" trustStorePath="+trustStorePath
-            		+" trustStorePass="+trustStorePass);
+            		+" trustStorePath="+trustStorePath);
         Stream dsBuffer = new Stream();
 //        Datastream[] dsds = null;
 //        try {
@@ -706,10 +700,7 @@ public class GenericOperationsImpl implements Operations {
                     " parameters="+parameters+
                     " asOfDateTime="+asOfDateTime
             		+" fedoraSoap="+fedoraSoap
-            		+" fedoraUser="+fedoraUser
-            		+" fedoraPass="+fedoraPass
-            		+" trustStorePath="+trustStorePath
-            		+" trustStorePass="+trustStorePass);
+            		+" trustStorePath="+trustStorePath);
         StringTokenizer st = new StringTokenizer(parameters);
         fedora.server.types.gen.Property[] params = new fedora.server.types.gen.Property[st.countTokens()];
         for (int i=0; i<st.countTokens(); i++) {
