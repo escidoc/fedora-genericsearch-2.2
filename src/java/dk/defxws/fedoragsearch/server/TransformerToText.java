@@ -179,7 +179,6 @@ public final class TransformerToText {
                 if(event.getEventType() == XMLEvent.CHARACTERS) {
                     docText.write(event.asCharacters().getData().getBytes(Constants.XML_CHARACTER_ENCODING));
                 }
-                reader.next();
             }
         } catch(Exception e) {
             if (errorFlag) {
