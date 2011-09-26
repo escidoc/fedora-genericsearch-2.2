@@ -147,7 +147,6 @@ public class GTransformer {
                     if(event.getEventType() == XMLEvent.CHARACTERS) {
                         stream.write(event.asCharacters().getData().getBytes("UTF-8"));
                     }
-                    reader.next();
                 }
             } catch(IOException e) {
                 throw new GenericSearchException(e.getMessage(), e);

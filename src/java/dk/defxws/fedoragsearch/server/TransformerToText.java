@@ -180,7 +180,6 @@ public final class TransformerToText {
 					docText.write(event.asCharacters().getData()
 							.getBytes(Constants.XML_CHARACTER_ENCODING));
 				}
-				reader.next();
 			}
 		} catch (Exception e) {
 			if (errorFlag) {
