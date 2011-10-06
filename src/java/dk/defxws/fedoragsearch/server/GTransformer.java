@@ -219,7 +219,6 @@ public class GTransformer {
         int argCount=2;
         try {
             if (args.length==argCount) {
-                File f = new File(args[1]);
                 StreamSource ss = new StreamSource(new File(args[1]));
                 GTransformer gt = new GTransformer();
                 StreamResult destStream = new StreamResult(new StringWriter());

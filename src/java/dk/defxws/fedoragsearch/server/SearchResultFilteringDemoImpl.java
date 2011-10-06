@@ -29,7 +29,6 @@ import dk.defxws.fedoragsearch.server.utils.IOUtils;
 import dk.defxws.fedoragsearch.server.utils.Stream;
 import fedora.client.FedoraClient;
 import fedora.common.Constants;
-import fedora.server.access.FedoraAPIA;
 import fedora.server.management.FedoraAPIM;
 
 /**
@@ -44,7 +43,7 @@ public class SearchResultFilteringDemoImpl implements SearchResultFiltering {
     private static final Logger logger =
         Logger.getLogger(SearchResultFilteringDemoImpl.class);
 
-    private static final Map fedoraClients = new HashMap();
+    private static final Map<String, FedoraClient> fedoraClients = new HashMap<String, FedoraClient>();
     
     public String selectIndexNameForPresearch(String fgsUserName, String indexNameParam) throws java.rmi.RemoteException {
     	String indexName = indexNameParam;
@@ -183,7 +182,7 @@ public class SearchResultFilteringDemoImpl implements SearchResultFiltering {
             String clientId = user + "@" + baseURL;
             synchronized (fedoraClients) {
                 if (fedoraClients.containsKey(clientId)) {
-                    return (FedoraClient) fedoraClients.get(clientId);
+                    return fedoraClients.get(clientId);
                 } else {
                     FedoraClient client = new FedoraClient(baseURL,
                             user, fedoraPass);
@@ -200,7 +199,7 @@ public class SearchResultFilteringDemoImpl implements SearchResultFiltering {
     private static String getBaseURL(String fedoraSoap)
             throws Exception {
         final String end = "/services";
-        String baseURL = fedoraSoap;
+
         if (fedoraSoap.endsWith(end)) {
             return fedoraSoap.substring(0, fedoraSoap.length() - end.length());
         } else {
@@ -210,27 +209,7 @@ public class SearchResultFilteringDemoImpl implements SearchResultFiltering {
         }
     }
 
-    private static FedoraAPIA getAPIA(
-    		String repositoryName,
-    		String fedoraSoap,
-    		String fedoraUser,
-    		String fedoraPass,
-    		String trustStorePath,
-    		String trustStorePass)
-    throws GenericSearchException {
-    	if (trustStorePath!=null)
-    		System.setProperty("javax.net.ssl.trustStore", trustStorePath);
-    	if (trustStorePass!=null)
-    		System.setProperty("javax.net.ssl.trustStorePassword", trustStorePass);
-    	FedoraClient client = getFedoraClient(repositoryName, fedoraSoap, fedoraUser, fedoraPass);
-    	try {
-    		return client.getAPIA();
-    	} catch (Exception e) {
-    		throw new GenericSearchException("Error getting API-A stub"
-    				+ " for repository: " + repositoryName, e);
-    	}
-    }
-    
+   
     private static FedoraAPIM getAPIM(
     		String repositoryName,
     		String fedoraSoap,

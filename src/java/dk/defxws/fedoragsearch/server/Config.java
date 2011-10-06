@@ -67,7 +67,7 @@ public class Config {
     
     private static Config currentConfig = null;
     
-    private static Hashtable configs = new Hashtable();
+    private static Hashtable<String, Config> configs = new Hashtable<String, Config>();
     
     //MIH: store resources retrieved from an url////////////////
     private Hashtable<String, byte[]> urlResources = 
@@ -130,7 +130,7 @@ public class Config {
      */
     public static void configure(String configNameIn) throws ConfigException {
     	String configName = configNameIn;
-    	if (configName==null || configName.equals("")) {
+    	if (configName==null || configName.isEmpty()) {
     	    //MIH use default config-name
     		configName = getDefaultConfigName();
     	}
@@ -143,8 +143,10 @@ public class Config {
      * - creates a new Config object with the configName, if it does not exist,
      * - and sets that property.
      */
-    public static void configure(String configName, String propertyName, String propertyValue) throws ConfigException {
-    	Config config = (Config)configs.get(configName);
+    public static void configure(final String configName, final String propertyName, final String propertyValue) 
+    		throws ConfigException {
+
+    	Config config = configs.get(configName);
     	if (config==null) {
     		config = new Config(configName);
             configs.put(configName, config);
@@ -162,8 +164,8 @@ public class Config {
         return currentConfig;
     }
     
-    public static Config getConfig(String configName) throws ConfigException {
-    	Config config = (Config)configs.get(configName);
+    public static Config getConfig(final String configName) throws ConfigException {
+    	Config config = configs.get(configName);
         if (config == null) {
         	config = new Config(configName);
             configs.put(configName, config);
@@ -189,7 +191,7 @@ public class Config {
 
     public Config(String configNameIn) throws ConfigException {
     	configName = configNameIn;
-    	if (configName==null || configName.equals("")) {
+    	if (configName==null || configName.isEmpty()) {
     	    //MIH use default config-name
     		configName = getDefaultConfigName();
     	}
@@ -536,7 +538,7 @@ public class Config {
 
 //  		Check operationsImpl class
     		String operationsImpl = props.getProperty("fgsindex.operationsImpl");
-    		if (operationsImpl == null || operationsImpl.equals("")) {
+    		if (operationsImpl == null || operationsImpl.isEmpty()) {
     			errors.append("\n*** "+configName+"/index/" + indexName
     					+ ": fgsindex.operationsImpl must be set in "+configName+"/index/ "
     					+ indexName + ".properties");
@@ -593,7 +595,7 @@ public class Config {
 //  		Check analyzer class for lucene and solr
     		if (operationsImpl.indexOf("fgslucene")>-1 || operationsImpl.indexOf("fgssolr")>-1) {
     			String analyzer = props.getProperty("fgsindex.analyzer"); 
-    			if (analyzer == null || analyzer.equals("")) {
+    			if (analyzer == null || analyzer.isEmpty()) {
     				analyzer = defaultAnalyzer;
     			}
     			try {
@@ -664,7 +666,7 @@ public class Config {
     		if (operationsImpl.indexOf("fgslucene")>-1 || operationsImpl.indexOf("fgssolr")>-1) {
     			Class uriResolverClass = null;
     			String uriResolver = props.getProperty("fgsindex.uriResolver");
-    			if (!(uriResolver == null || uriResolver.equals(""))) {
+    			if (!(uriResolver == null || uriResolver.isEmpty())) {
     				try {
     					uriResolverClass = Class.forName(uriResolver);
     					try {
@@ -855,11 +857,11 @@ public class Config {
             String nonProxyHosts = EscidocConfiguration.getInstance()
                 .get(EscidocConfiguration.ESCIDOC_CORE_NON_PROXY_HOSTS);
             if (proxyHostName != null
-                    && !proxyHostName.trim().equals("")) {
+                    && !proxyHostName.trim().isEmpty()) {
                 //check noProxyHosts
                 boolean noProxy = false;
                 if (nonProxyHosts != null
-                    && !nonProxyHosts.trim().equals("")) {
+                    && !nonProxyHosts.trim().isEmpty()) {
                     nonProxyHosts = nonProxyHosts.replaceAll("\\.", "\\\\.");
                     nonProxyHosts = nonProxyHosts.replaceAll("\\*", "");
                     nonProxyHosts = nonProxyHosts.replaceAll("\\?", "\\\\?");
@@ -872,7 +874,7 @@ public class Config {
                 if (!noProxy) {
                     ProxyHost proxyHost = null;
                     if (proxyPort != null
-                        && !proxyPort.trim().equals("")) {
+                        && !proxyPort.trim().isEmpty()) {
                         proxyHost = new ProxyHost(proxyHostName
                                     , Integer.parseInt(proxyPort));
                     } else {
@@ -996,7 +998,7 @@ public class Config {
     }
     
     public String getIndexNames(String indexNames) {
-        if (indexNames==null || indexNames.equals("")) 
+        if (indexNames==null || indexNames.isEmpty()) 
             return fgsProps.getProperty("fedoragsearch.indexNames");
         else 
             return indexNames;
@@ -1013,7 +1015,7 @@ public class Config {
     ///////////////////////////////////////////////////////////////////////////
 
     public String getRepositoryName(String repositoryName) {
-        if (repositoryName==null || repositoryName.equals("")) 
+        if (repositoryName==null || repositoryName.isEmpty()) 
             return defaultRepositoryName;
         else 
             return repositoryName;
@@ -1024,7 +1026,7 @@ public class Config {
     	String hostPort = url.getHost();
     	if (url.getPort()>-1)
     		hostPort += ":"+url.getPort();
-        if (!(hostPort==null || hostPort.equals(""))) {
+        if (!(hostPort==null || hostPort.isEmpty())) {
         	Enumeration propss = repositoryNameToProps.elements();
         	while (propss.hasMoreElements()) {
         		Properties props = (Properties)propss.nextElement();
@@ -1084,7 +1086,7 @@ public class Config {
     }
     
     public String getRepositoryInfoResultXslt(String repositoryName, String resultPageXslt) {
-        if (resultPageXslt==null || resultPageXslt.equals("")) 
+        if (resultPageXslt==null || resultPageXslt.isEmpty()) 
             return (getRepositoryProps(getRepositoryName(repositoryName))).getProperty("fgsrepository.defaultGetRepositoryInfoResultXslt");
         else 
             return resultPageXslt;
@@ -1103,7 +1105,7 @@ public class Config {
     }    
     
     public String getIndexName(String indexName) {
-        if (indexName==null || indexName.equals("")) 
+        if (indexName==null || indexName.isEmpty()) 
             return defaultIndexName;
         else {
         	int i = indexName.indexOf("/");
@@ -1119,42 +1121,42 @@ public class Config {
     }
     
     public String getUpdateIndexDocXslt(String indexName, String indexDocXslt) {
-        if (indexDocXslt==null || indexDocXslt.equals("")) 
+        if (indexDocXslt==null || indexDocXslt.isEmpty()) 
             return (getIndexProps(indexName)).getProperty("fgsindex.defaultUpdateIndexDocXslt");
         else 
             return indexDocXslt;
     }
     
     public String getUpdateIndexResultXslt(String indexName, String resultPageXslt) {
-        if (resultPageXslt==null || resultPageXslt.equals("")) 
+        if (resultPageXslt==null || resultPageXslt.isEmpty()) 
             return (getIndexProps(indexName)).getProperty("fgsindex.defaultUpdateIndexResultXslt");
         else 
             return resultPageXslt;
     }
     
     public String getGfindObjectsResultXslt(String indexName, String resultPageXslt) {
-        if (resultPageXslt==null || resultPageXslt.equals("")) 
+        if (resultPageXslt==null || resultPageXslt.isEmpty()) 
             return (getIndexProps(indexName)).getProperty("fgsindex.defaultGfindObjectsResultXslt");
         else 
             return resultPageXslt;
     }
 
 	public String getSortFields(String indexName, String sortFields) {
-        if (sortFields==null || sortFields.equals("")) 
+        if (sortFields==null || sortFields.isEmpty()) 
             return (getIndexProps(indexName)).getProperty("fgsindex.defaultSortFields");
         else 
             return sortFields;
     }
     
     public String getBrowseIndexResultXslt(String indexName, String resultPageXslt) {
-        if (resultPageXslt==null || resultPageXslt.equals("")) 
+        if (resultPageXslt==null || resultPageXslt.isEmpty()) 
             return (getIndexProps(indexName)).getProperty("fgsindex.defaultBrowseIndexResultXslt");
         else 
             return resultPageXslt;
     }
     
     public String getIndexInfoResultXslt(String indexName, String resultPageXslt) {
-        if (resultPageXslt==null || resultPageXslt.equals("")) 
+        if (resultPageXslt==null || resultPageXslt.isEmpty()) 
             return (getIndexProps(indexName)).getProperty("fgsindex.defaultGetIndexInfoResultXslt");
         else 
             return resultPageXslt;
@@ -1379,7 +1381,7 @@ public class Config {
     public String getProperty(String propertyName)
     	throws ConfigException {
     	String propertyValue = null;
-        if (!(propertyName==null || propertyName.equals(""))) {
+        if (!(propertyName==null || propertyName.isEmpty())) {
             int i = propertyName.indexOf("/");
             String propName = propertyName;
         	Properties props = null;
@@ -1412,7 +1414,7 @@ public class Config {
     	throws ConfigException {
         if (logger.isInfoEnabled())
             logger.info("property " + propertyName + "=" + propertyValue);
-        if (!(propertyName==null || propertyName.equals(""))) {
+        if (!(propertyName==null || propertyName.isEmpty())) {
             int i = propertyName.indexOf("/");
             String propName = propertyName;
         	Properties props = null;

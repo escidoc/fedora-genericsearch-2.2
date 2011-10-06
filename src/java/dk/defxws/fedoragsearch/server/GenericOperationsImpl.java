@@ -39,11 +39,9 @@ import dk.defxws.fedoragsearch.server.errors.FedoraObjectNotFoundException;
 import dk.defxws.fedoragsearch.server.errors.GenericSearchException;
 import dk.defxws.fedoragsearch.server.utils.IOUtils;
 import dk.defxws.fedoragsearch.server.utils.Stream;
-import fedora.client.FedoraClient;
 import fedora.common.Constants;
-import fedora.server.access.FedoraAPIA;
-import fedora.server.management.FedoraAPIM;
 
+import com.yourmediashelf.fedora.client.FedoraClient;
 /**
  * performs the generic parts of the operations
  * 
@@ -55,9 +53,7 @@ public class GenericOperationsImpl implements Operations {
     private static final Logger logger =
         Logger.getLogger(GenericOperationsImpl.class);
 
-    private static final Map fedoraClients = new HashMap();
-
-    private static final Map fedoraRestClients = new HashMap();
+	private static final Map<String, FedoraClient> fedoraRestClients = new HashMap<String, FedoraClient>();
 
     protected String fgsUserName;
     protected String indexName;
@@ -74,38 +70,6 @@ public class GenericOperationsImpl implements Operations {
     protected String dsText;
     protected String[] params = null;
 
-    private static FedoraClient getFedoraClient(
-    		String repositoryName,
-    		String fedoraSoap,
-    		String fedoraUser,
-    		String fedoraPass)
-            throws GenericSearchException {
-        try {
-            String baseURL = getBaseURL(fedoraSoap);
-            String user = fedoraUser; 
-            String clientId = user + "@" + baseURL;
-            synchronized (fedoraClients) {
-                if (fedoraClients.containsKey(clientId)) {
-                    return (FedoraClient) fedoraClients.get(clientId);
-                } else {
-                    FedoraClient client = new FedoraClient(baseURL,
-                            user, fedoraPass);
-                    //MIH: modifiy connection-parameters//////////////////////
-                    client.MAX_CONNECTIONS_PER_HOST = 1500;
-                    client.MAX_TOTAL_CONNECTIONS = 1500;
-                    client.SOCKET_TIMEOUT_SECONDS = 1800;
-                    client.TIMEOUT_SECONDS = 1800;
-                    //////////////////////////////////////////////////////////
-                    fedoraClients.put(clientId, client);
-                    return client;
-                }
-            }
-        } catch (Exception e) {
-            throw new GenericSearchException("Error getting FedoraClient"
-                    + " for repository: " + repositoryName, e);
-        }
-    }
-
     //MIH: Added for REST-Access
     private static com.yourmediashelf.fedora.client.FedoraClient getRestFedoraClient(
     		String repositoryName,
@@ -118,11 +82,10 @@ public class GenericOperationsImpl implements Operations {
             String clientId = user + "@" + fedoraRest;
             synchronized (fedoraRestClients) {
                 if (fedoraRestClients.containsKey(clientId)) {
-                    return (com.yourmediashelf.fedora.client.FedoraClient) fedoraRestClients.get(clientId);
+                    return fedoraRestClients.get(clientId);
                 } else {
-                	com.yourmediashelf.fedora.client.FedoraClient restClient = 
-                		new com.yourmediashelf.fedora.client.FedoraClient(
-                				new FedoraCredentials(new URL(fedoraRest), user, fedoraPass));
+                	FedoraClient restClient = 
+                		new FedoraClient(new FedoraCredentials(new URL(fedoraRest), user, fedoraPass));
                     fedoraRestClients.put(clientId, restClient);
                     return restClient;
                 }
@@ -133,61 +96,6 @@ public class GenericOperationsImpl implements Operations {
         }
     }
 
-    private static String getBaseURL(String fedoraSoap)
-            throws Exception {
-        final String end = "/services";
-        String baseURL = fedoraSoap;
-        if (fedoraSoap.endsWith(end)) {
-            return fedoraSoap.substring(0, fedoraSoap.length() - end.length());
-        } else {
-            throw new Exception("Unable to determine baseURL from fedoraSoap"
-                    + " value (expected it to end with '" + end + "'): "
-                    + fedoraSoap);
-        }
-    }
-
-    private static FedoraAPIA getAPIA(
-    		String repositoryName,
-    		String fedoraSoap,
-    		String fedoraUser,
-    		String fedoraPass,
-    		String trustStorePath,
-    		String trustStorePass)
-    throws GenericSearchException {
-    	if (trustStorePath!=null)
-    		System.setProperty("javax.net.ssl.trustStore", trustStorePath);
-    	if (trustStorePass!=null)
-    		System.setProperty("javax.net.ssl.trustStorePassword", trustStorePass);
-    	FedoraClient client = getFedoraClient(repositoryName, fedoraSoap, fedoraUser, fedoraPass);
-    	try {
-    		return client.getAPIA();
-    	} catch (Exception e) {
-    		throw new GenericSearchException("Error getting API-A stub"
-    				+ " for repository: " + repositoryName, e);
-    	}
-    }
-    
-    private static FedoraAPIM getAPIM(
-    		String repositoryName,
-    		String fedoraSoap,
-    		String fedoraUser,
-    		String fedoraPass,
-    		String trustStorePath,
-    		String trustStorePass)
-    throws GenericSearchException {
-    	if (trustStorePath!=null)
-    		System.setProperty("javax.net.ssl.trustStore", trustStorePath);
-    	if (trustStorePass!=null)
-    		System.setProperty("javax.net.ssl.trustStorePassword", trustStorePass);
-    	FedoraClient client = getFedoraClient(repositoryName, fedoraSoap, fedoraUser, fedoraPass);
-    	try {
-    		return client.getAPIM();
-    	} catch (Exception e) {
-    		throw new GenericSearchException("Error getting API-M stub"
-    				+ " for repository: " + repositoryName, e);
-    	}
-    }
-    
     public void init(String indexName, Config currentConfig) {
     	init(null, indexName, currentConfig);
     }
