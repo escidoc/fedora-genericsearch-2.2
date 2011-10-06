@@ -14,11 +14,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.NoSuchElementException;
 
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
 import javax.xml.transform.stream.StreamSource;
 
@@ -626,7 +624,7 @@ public final class TransformerToText {
             fileIn = new FileInputStream(outputFileName);            
             in = new BufferedReader(
                     new InputStreamReader(fileIn, Constants.XML_CHARACTER_ENCODING));
-            String str = new String("");
+            String str;
             while ((str = in.readLine()) != null) {
                 textBuffer.write(str.getBytes(Constants.XML_CHARACTER_ENCODING));
                 textBuffer.write(" ".getBytes(Constants.XML_CHARACTER_ENCODING)); // TODO: Wofür sind Spaces nötig?
