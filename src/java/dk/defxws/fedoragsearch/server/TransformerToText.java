@@ -97,7 +97,7 @@ public final class TransformerToText {
     private TransformerToText() {
     }
 
-    public static Stream getText(InputStream doc, String mimetype)
+    public static Stream getText(final InputStream doc, final String mimetype)
             throws GenericSearchException {
         try {
             if (mimetype.equals("text/plain")) {
@@ -136,7 +136,7 @@ public final class TransformerToText {
         }
     }
 
-    private static Stream getTextFromText(InputStream input)
+    private static Stream getTextFromText(final InputStream input)
     throws GenericSearchException {
     	long time = System.currentTimeMillis();
         boolean errorFlag = Boolean.parseBoolean(
