@@ -12,7 +12,8 @@ import static com.yourmediashelf.fedora.client.FedoraClient.getDatastreamDissemi
 import static com.yourmediashelf.fedora.client.FedoraClient.getDissemination;
 import static com.yourmediashelf.fedora.client.FedoraClient.listDatastreams;
 
-import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -65,7 +66,7 @@ public class GenericOperationsImpl implements Operations {
     protected int docCount = 0;
     protected int warnCount = 0;
     
-    protected byte[] foxmlRecord;
+    private File foxmlRecord;
     protected String dsID;
     protected String dsText;
     protected String[] params = null;
@@ -263,12 +264,14 @@ public class GenericOperationsImpl implements Operations {
         return resultXml.toString();
     }
     
-    public void getFoxmlFromPid(
+    public File getFoxmlFromPid(
             String pid,
             String repositoryName)
     throws java.rmi.RemoteException {
         
         long time = System.currentTimeMillis();
+        File tempFile;
+        
     	if (logger.isInfoEnabled())
             logger.info("getFoxmlFromPid" +
                     " pid="+pid +
@@ -292,7 +295,7 @@ public class GenericOperationsImpl implements Operations {
 //        }
     	//MIH: REST
         InputStream inStr = null;
-        ByteArrayOutputStream out = null;
+        FileOutputStream out = null;
         try {
         	com.yourmediashelf.fedora.client.FedoraClient restClient = 
         		getRestFedoraClient(
@@ -303,7 +306,12 @@ public class GenericOperationsImpl implements Operations {
         	FedoraResponse response = export(pid).format(format)
         					.context("public").execute(restClient);
             inStr = response.getEntityInputStream();
-            out = new ByteArrayOutputStream();
+            
+            tempFile = File.createTempFile("fedoragsearch", "tmp");
+            tempFile.deleteOnExit();
+            
+            out = new FileOutputStream(tempFile);
+            
             if (inStr != null) {
                 byte[] bytes = new byte[0xFFFF];
                 int i = -1;
@@ -311,8 +319,10 @@ public class GenericOperationsImpl implements Operations {
                     out.write(bytes, 0, i);
                 }
                 out.flush();
-                foxmlRecord = out.toByteArray();
+                out.close();
+                setFoxmlRecord(tempFile);
             }
+            
             if (logger.isDebugEnabled()) {
         		logger.debug("getting foxml needed " + (System.currentTimeMillis() - time));
             }
@@ -332,6 +342,8 @@ public class GenericOperationsImpl implements Operations {
                 } catch (IOException e) {}
             }
         }
+        
+        return tempFile;
     }
     
     public Stream getDatastreamText(
@@ -713,5 +725,13 @@ public class GenericOperationsImpl implements Operations {
             throw new GenericSearchException(e.toString());
         }
     }
+
+	public File getFoxmlRecord() {
+		return foxmlRecord;
+	}
+
+	public void setFoxmlRecord(final File foxmlRecord) {
+		this.foxmlRecord = foxmlRecord;
+	}
     
 }
