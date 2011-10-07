@@ -92,7 +92,6 @@ public class RESTImpl extends HttpServlet {
         	// mainly for test purposes
         	config = Config.getConfig(configName);
         }
-        StringBuffer resultXml = new StringBuffer("<resultPage/>");
         if (logger.isInfoEnabled())
             logger.info("request="+request.getQueryString()+" remoteUser="+request.getRemoteUser());
         repositoryName = request.getParameter(PARAM_REPOSITORYNAME);
@@ -108,6 +107,8 @@ public class RESTImpl extends HttpServlet {
         params[1] = "";
         params[2] = "TIMEUSEDMS";
         params[3] = "";
+
+        StringBuffer resultXml;
         try {
             if (OP_GFINDOBJECTS.equals(operation)) {
                 resultXml = new StringBuffer(gfindObjects(request, response));
@@ -128,7 +129,7 @@ public class RESTImpl extends HttpServlet {
                 resultXml = new StringBuffer(getIndexConfigInfo(request, response));
             } else {
                 resultXml = new StringBuffer("<resultPage/>");
-                if (restXslt==null || restXslt.equals("")) 
+                if (restXslt==null || restXslt.isEmpty()) 
                     restXslt = config.getDefaultGfindObjectsRestXslt();
                 if (operation!=null && !"".equals(operation)) {
                     throw new GenericSearchException("ERROR: operation "+operation+" is unknown!");
@@ -175,11 +176,11 @@ public class RESTImpl extends HttpServlet {
     
     private String gfindObjects(HttpServletRequest request, HttpServletResponse response)
     throws java.rmi.RemoteException {
-        if (restXslt==null || restXslt.equals("")) {
+        if (restXslt==null || restXslt.isEmpty()) {
             restXslt = config.getDefaultGfindObjectsRestXslt();
         }
         String query = request.getParameter(PARAM_QUERY);
-        if (query==null || query.equals("")) {
+        if (query==null || query.isEmpty()) {
             return "<resultPage/>";
         }
         int hitPageStart = config.getDefaultGfindObjectsHitPageStart();
@@ -214,7 +215,7 @@ public class RESTImpl extends HttpServlet {
     
     private String browseIndex(HttpServletRequest request, HttpServletResponse response)
     throws java.rmi.RemoteException {
-        if (restXslt==null || restXslt.equals("")) {
+        if (restXslt==null || restXslt.isEmpty()) {
             restXslt = config.getDefaultBrowseIndexRestXslt();
         }
         String startTerm = request.getParameter(PARAM_STARTTERM);
@@ -238,7 +239,7 @@ public class RESTImpl extends HttpServlet {
     
     private String getRepositoryInfo(HttpServletRequest request, HttpServletResponse response)
     throws java.rmi.RemoteException {
-        if (restXslt==null || restXslt.equals("")) {
+        if (restXslt==null || restXslt.isEmpty()) {
             restXslt = config.getDefaultGetRepositoryInfoRestXslt();
         }
         GenericOperationsImpl ops = new GenericOperationsImpl();
@@ -249,7 +250,7 @@ public class RESTImpl extends HttpServlet {
     
     private String getIndexInfo(HttpServletRequest request, HttpServletResponse response)
     throws java.rmi.RemoteException {
-        if (restXslt==null || restXslt.equals("")) {
+        if (restXslt==null || restXslt.isEmpty()) {
             restXslt = config.getDefaultGetIndexInfoRestXslt();
         }
         Operations ops = config.getOperationsImpl(indexName);
@@ -260,7 +261,7 @@ public class RESTImpl extends HttpServlet {
     //MIH: flush stored url-resources
     private String flushUrlResources(HttpServletRequest request, HttpServletResponse response)
     throws java.rmi.RemoteException {
-        if (restXslt==null || restXslt.equals("")) {
+        if (restXslt==null || restXslt.isEmpty()) {
             restXslt = config.getDefaultGetIndexInfoRestXslt();
         }
     	config.setUrlResources(new Hashtable<String, byte[]>());
@@ -269,7 +270,7 @@ public class RESTImpl extends HttpServlet {
     
     public String updateIndex(HttpServletRequest request, HttpServletResponse response)
     throws java.rmi.RemoteException {
-        if (restXslt==null || restXslt.equals("")) {
+        if (restXslt==null || restXslt.isEmpty()) {
             restXslt = config.getDefaultUpdateIndexRestXslt();
         }
         String action = request.getParameter(PARAM_ACTION);
@@ -289,7 +290,7 @@ public class RESTImpl extends HttpServlet {
         String configName = request.getParameter(PARAM_CONFIGNAME);
         String propertyName = request.getParameter("propertyName");
         String propertyValue = "";
-        if (!(propertyName==null || propertyName.equals(""))) {
+        if (!(propertyName==null || propertyName.isEmpty())) {
             propertyValue = request.getParameter("propertyValue");
             // used to set or change a property value, mainly for test purposes
             Config.configure(configName, propertyName, propertyValue);
@@ -298,14 +299,14 @@ public class RESTImpl extends HttpServlet {
             Config.configure(configName);
             config = Config.getCurrentConfig();
         }
-        if (restXslt==null || restXslt.equals("")) 
+        if (restXslt==null || restXslt.isEmpty()) 
             restXslt = config.getDefaultGfindObjectsRestXslt();
         return "<resultPage/>";
     }
     
     private String getIndexConfigInfo(HttpServletRequest request, HttpServletResponse response)
     throws java.rmi.RemoteException {
-        if (restXslt==null || restXslt.equals("")) 
+        if (restXslt==null || restXslt.isEmpty()) 
             restXslt = "copyXml";
         StringBuffer resultXml = new StringBuffer("<resultPage>");
     	String[] indexNames = config.getIndexNames(null).split("\\s");
