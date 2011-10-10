@@ -41,7 +41,11 @@ import dk.defxws.fedoragsearch.server.URIResolverImpl;
 
 public class EscidocUriResolver extends URIResolverImpl {
 
-    public Source resolve(String href, String base) throws TransformerException {
+	/**
+	 * @param href
+	 * @param base
+	 */
+    public Source resolve(final String href, final String base) throws TransformerException {
         try {
             InputStream stylesheet = null;
             //if xsltPath starts with http, get stylesheet from url
@@ -65,7 +69,7 @@ public class EscidocUriResolver extends URIResolverImpl {
                 }
             }
             if (stylesheet==null) {
-                throw new TransformerException("couldnt find resource");
+                throw new TransformerException("could not find resource: " + href);
             }
 
             StreamSource xslt = new StreamSource(stylesheet);

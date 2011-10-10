@@ -77,26 +77,26 @@ public class LastdateHelper {
         final String created, final String modified, final String submitted,
         final String accepted, final String issued, final String released) {
         String newestDate = "";
-        if (created != null && !created.equals("")) {
+        if (created != null && !created.isEmpty()) {
             newestDate = created;
         }
-        if (modified != null && !modified.equals("")
+        if (modified != null && !modified.isEmpty()
             && modified.compareTo(newestDate) > 0) {
             newestDate = modified;
         }
-        if (submitted != null && !submitted.equals("")
+        if (submitted != null && !submitted.isEmpty()
             && submitted.compareTo(newestDate) > 0) {
             newestDate = submitted;
         }
-        if (accepted != null && !accepted.equals("")
+        if (accepted != null && !accepted.isEmpty()
             && accepted.compareTo(newestDate) > 0) {
             newestDate = accepted;
         }
-        if (issued != null && !issued.equals("")
+        if (issued != null && !issued.isEmpty()
             && issued.compareTo(newestDate) > 0) {
             newestDate = issued;
         }
-        if (released != null && !released.equals("")
+        if (released != null && !released.isEmpty()
         		&& released.compareTo(newestDate) > 0) {
             newestDate = released;
         }
@@ -129,31 +129,31 @@ public class LastdateHelper {
         final String accepted, final String issued, final String released) {
         String elementName = "";
         String newestDate = "";
-        if (created != null && !created.equals("")) {
+        if (created != null && !created.isEmpty()) {
             elementName = contextName + dateElementNames.get("created");
             newestDate = created;
         }
-        if (modified != null && !modified.equals("")
+        if (modified != null && !modified.isEmpty()
             && modified.compareTo(newestDate) > 0) {
             elementName = contextName + dateElementNames.get("modified");;
             newestDate = modified;
         }
-        if (submitted != null && !submitted.equals("")
+        if (submitted != null && !submitted.isEmpty()
             && submitted.compareTo(newestDate) > 0) {
             elementName = contextName + dateElementNames.get("submitted");;
             newestDate = submitted;
         }
-        if (accepted != null && !accepted.equals("")
+        if (accepted != null && !accepted.isEmpty()
             && accepted.compareTo(newestDate) > 0) {
             elementName = contextName + dateElementNames.get("accepted");;
             newestDate = accepted;
         }
-        if (issued != null && !issued.equals("")
+        if (issued != null && !issued.isEmpty()
             && issued.compareTo(newestDate) > 0) {
             elementName = contextName + dateElementNames.get("issued");;
             newestDate = issued;
         }
-        if (released != null && !released.equals("")
+        if (released != null && !released.isEmpty()
         		&& released.compareTo(newestDate) > 0) {
             elementName = contextName + dateElementNames.get("released");
         }

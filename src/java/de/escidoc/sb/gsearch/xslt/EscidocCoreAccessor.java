@@ -139,7 +139,7 @@ public class EscidocCoreAccessor {
             StringBuffer buf = new StringBuffer("");
             Matcher lastSlashMatcher = 
                 Constants.LAST_SLASH_PATTERN.matcher("");
-            for (String attribute : attributes) {
+            for (final String attribute : attributes) {
                 if (getObjidFromHref != null 
                         && getObjidFromHref.equals("true")) {
                     lastSlashMatcher.reset(attribute);

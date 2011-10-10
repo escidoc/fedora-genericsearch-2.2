@@ -70,17 +70,17 @@ public class StringHelper {
     }
 
   /**
-     * Returns the substring after the last occurence of character.
+     * Returns the substring after the last occurrence of character.
      * 
      * @param term
      *            term
      * @param term1
      *            character
-     * @return String substring of term after last occurence of term1.
+     * @return String substring of term after last occurrence of term1.
      */
     public static String getSubstringAfterLast(
         final String term, final String term1) {
-        if (StringUtils.isEmpty(term) || StringUtils.isEmpty(term1) 
+        if (term.isEmpty() || term1.isEmpty() 
                 || term.lastIndexOf(term1) == -1) {
             return term;
         }
@@ -102,7 +102,7 @@ public class StringHelper {
     	if (nodeList != null && nodeList.getLength() == 1) {
     		term = nodeList.item(0).getNodeValue();
     	}
-        if (StringUtils.isEmpty(term) || StringUtils.isEmpty(term1) 
+        if (term.isEmpty() || term.isEmpty() 
                 || term.lastIndexOf(term1) == -1) {
             return term;
         }
@@ -120,6 +120,7 @@ public class StringHelper {
         if (input == null) {
             return null;
         }
+        
         String output = input.toLowerCase();
         matcher.reset(output);
         output = matcher.replaceAll("$1e");
@@ -165,7 +166,7 @@ public class StringHelper {
         if (MATCHER_ID_WITHOUT_VERSION.find()) {
             result = MATCHER_ID_WITHOUT_VERSION.group(1);
         }
-        if (!StringUtils.isEmpty(pidSuffix)) {
+        if (!pidSuffix.isEmpty()) {
             result += ":" + pidSuffix;
         }
         return result;
@@ -190,16 +191,18 @@ public class StringHelper {
             final int length, 
             final int decimals, 
             final String separator) {
-        if (input == null) {
+
+    	if (input == null) {
             return null;
         }
         
         
         try {
-            new Float(input);
-        } catch (Exception e) {
+            Float.valueOf(input);
+        } catch (NumberFormatException e) {
             return input;
         }
+        
         String modifiedInput = input;
         modifiedInput = modifiedInput.replaceAll(
                 "[^0-9\\" + separator + "]", "");
