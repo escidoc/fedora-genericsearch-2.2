@@ -7,7 +7,10 @@
  */
 package dk.defxws.fedoragsearch.server;
 
+import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.Date;
@@ -19,6 +22,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 
 import dk.defxws.fedoragsearch.server.utils.IOUtils;
 import dk.defxws.fedoragsearch.server.utils.Stream;
@@ -131,7 +135,7 @@ public class RESTImpl extends HttpServlet {
                 resultXml = new StringBuffer("<resultPage/>");
                 if (restXslt==null || restXslt.isEmpty()) 
                     restXslt = config.getDefaultGfindObjectsRestXslt();
-                if (operation!=null && !"".equals(operation)) {
+                if (operation!=null && !operation.isEmpty()) {
                     throw new GenericSearchException("ERROR: operation "+operation+" is unknown!");
                 }
             }
@@ -139,10 +143,9 @@ public class RESTImpl extends HttpServlet {
 //            throw new ServletException("ERROR: \n", e);
 //            params[1] = e.toString();
             resultXml = new StringBuffer("<resultPage>");
-            resultXml.append("<error><message><![CDATA["+e.getMessage()
-            					.replaceAll("!\\[CDATA\\[", "")
-            					.replaceAll("\\]\\]", "")
-            					+ "]]></message></error>");
+            resultXml.append("<error><message><![CDATA[");
+            resultXml.append(e.getMessage().replaceAll("!\\[CDATA\\[", "").replaceAll("\\]\\]", ""));
+            resultXml.append("]]></message></error>");
             resultXml.append("</resultPage>");
             params[1] = e.getMessage();
             logger.error(e);
@@ -154,22 +157,37 @@ public class RESTImpl extends HttpServlet {
         params[5] = request.getRemoteUser();
         params[6] = "SRFTYPE";
         params[7] = config.getSearchResultFilteringType();
-        Stream stream = (new GTransformer()).transform(
+        Stream stream = new GTransformer().transform(
         				config.getConfigName()+"/rest/"+restXslt,
         				resultXml, params);
-        resultXml = IOUtils.convertStreamToStringBuffer(stream);
-//        if (logger.isDebugEnabled())
-//            logger.debug("after "+restXslt+" result=\n"+resultXml);
-        
-        if (restXslt.indexOf(CONTENTTYPEHTML)>=0)
+        stream.lock();
+
+        /*
+         *  write content to servlet output stream
+         */
+        if (restXslt.indexOf(CONTENTTYPEHTML)>=0) {
             response.setContentType("text/html; charset=UTF-8");
-        else
+        }
+        else {
             response.setContentType("text/xml; charset=UTF-8");
-        PrintWriter out=new PrintWriter(
-                new OutputStreamWriter(
-                        response.getOutputStream(), "UTF-8"));
-        out.print(resultXml);
+        }
+        
+        ServletOutputStream out = response.getOutputStream();
+        InputStream in = stream.getInputStream();
+        BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(out);
+        response.setContentLength((int) stream.size()); // FIXME downcast!
+        byte[] buff = new byte[4096];
+
+        int bytesRead;
+        while (-1 != (bytesRead = in.read(buff, 0, buff.length))) {
+            bufferedOutputStream.write(buff, 0, bytesRead);
+        }
+        out.flush();
         out.close();
+        in.close();
+        
+        stream.close();
+        
         if (logger.isInfoEnabled())
             logger.info("request="+request.getQueryString()+" timeusedms="+timeusedms);
     }

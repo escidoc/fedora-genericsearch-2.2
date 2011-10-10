@@ -46,16 +46,18 @@ public class URIResolverImpl implements URIResolver {
 			throw new TransformerException("resolve new URL href="+href+" base="+base, e);
 		}
 		String reposName = config.getRepositoryNameFromUrl(url);
-        if (logger.isDebugEnabled())
+        if (logger.isDebugEnabled()) {
             logger.debug("resolve get href="+href+" base="+base+" url="+url.toString()+" reposName="+reposName);
+        }
 //		System.setProperty("http.user", config.getFedoraUser(reposName));
 //		System.setProperty("http.password", config.getFedoraPass(reposName));
 		System.setProperty("javax.net.ssl.trustStore", config.getTrustStorePath(reposName));
 		System.setProperty("javax.net.ssl.trustStorePassword", config.getTrustStorePass(reposName));
 		WebClient client = new WebClient();
 		try {
-	        if (logger.isDebugEnabled())
+	        if (logger.isDebugEnabled()) {
 	            logger.debug("resolve get source=\n"+client.getResponseAsString(href, false, new UsernamePasswordCredentials(config.getFedoraUser(reposName), config.getFedoraPass(reposName))));
+	        }
 			source = new StreamSource(client.get(href, false, config.getFedoraUser(reposName), config.getFedoraPass(reposName)));
 		} catch (IOException e) {
 			throw new TransformerException("resolve get href="+href+" base="+base, e);
