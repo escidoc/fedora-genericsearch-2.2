@@ -182,6 +182,8 @@ public class RESTImpl extends HttpServlet {
         while (-1 != (bytesRead = in.read(buff, 0, buff.length))) {
             bufferedOutputStream.write(buff, 0, bytesRead);
         }
+        bufferedOutputStream.flush();
+        bufferedOutputStream.close();
         out.flush();
         out.close();
         in.close();
