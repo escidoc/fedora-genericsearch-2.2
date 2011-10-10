@@ -55,18 +55,18 @@ public class ObjectAttributeHandler extends DefaultHandler {
     /*
      * 
      */
-    public ObjectAttributeHandler(StaxParser parser) {
+    public ObjectAttributeHandler(final StaxParser parser) {
         this.parser = parser;
 
     }
 
     @Override
-    public StartElement startElement(StartElement element) {
+    public StartElement startElement(final StartElement element) {
         String currentPath = parser.getCurPath();
         if (elementPath.equals(currentPath)) {
             inElementData = true;
         }
-        if (attributeName != null && !attributeName.equals("")) {
+        if (attributeName != null && !attributeName.isEmpty()) {
             if (elementPath.equals(currentPath)) {
                 int indexOfAttribute = element.indexOfAttribute(
                         attributeNamespaceUri, attributeName);
@@ -81,7 +81,7 @@ public class ObjectAttributeHandler extends DefaultHandler {
 
     @Override
     public String characters(final String s, final StartElement element) {
-        if (attributeName == null || attributeName.equals("")) {
+        if (attributeName == null || attributeName.isEmpty()) {
             if (inElementData) {
                 thisAttribute.append(s);
             }
@@ -90,7 +90,7 @@ public class ObjectAttributeHandler extends DefaultHandler {
     }
 
     @Override
-    public EndElement endElement(EndElement element) {
+    public EndElement endElement(final EndElement element) {
         String currentPath = parser.getCurPath();
         if (elementPath.equals(currentPath)) {
             attributes.add(thisAttribute.toString());
@@ -110,21 +110,21 @@ public class ObjectAttributeHandler extends DefaultHandler {
     /**
      * @param elementPath the elementPath to set
      */
-    public void setElementPath(String elementPath) {
+    public void setElementPath(final String elementPath) {
         this.elementPath = elementPath;
     }
 
     /**
      * @param attributeName the attributeName to set
      */
-    public void setAttributeName(String attributeName) {
+    public void setAttributeName(final String attributeName) {
         this.attributeName = attributeName;
     }
 
     /**
      * @param attributeNamespaceUri the attributeNamespaceUri to set
      */
-    public void setAttributeNamespaceUri(String attributeNamespaceUri) {
+    public void setAttributeNamespaceUri(final String attributeNamespaceUri) {
         this.attributeNamespaceUri = attributeNamespaceUri;
     }
     

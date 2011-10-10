@@ -45,12 +45,13 @@ public class ContainerMembersCountHandler extends DefaultHandler {
 
     /*
      * 
-     */public ContainerMembersCountHandler(StaxParser parser) {
+     */
+    public ContainerMembersCountHandler(final StaxParser parser) {
         this.parser = parser;
 
     }
 
-    public StartElement startElement(StartElement element) {
+    public StartElement startElement(final StartElement element) {
 
         String currentPath = parser.getCurPath();
 

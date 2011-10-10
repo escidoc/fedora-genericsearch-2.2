@@ -33,43 +33,43 @@ import de.escidoc.core.common.util.xml.stax.events.StartElement;
 import de.escidoc.core.common.util.xml.stax.handler.DefaultHandler;
 
 public class UserNameHandler extends DefaultHandler {
-    public static final String XLINK_PREFIX = "xlink";
+	public static final String XLINK_PREFIX = "xlink";
 
-    public static final String XLINK_URI = "http://www.w3.org/1999/xlink";
+	public static final String XLINK_URI = "http://www.w3.org/1999/xlink";
 
-    protected StaxParser parser;
+	protected StaxParser parser;
 
-    protected String userName;
+	protected String userName;
 
-    /*
+	private static final String USER_NAME_PATH = "/user-account/properties/name";
+
+	/*
      * 
-     */public UserNameHandler(StaxParser parser) {
-        this.parser = parser;
-
-    }
-
-    /**
-     * Handle the character section of an element.
-     * 
-     * @param s
-     *            The contents of the character section.
-     * @param element
-     *            The element.
-     * @return The character section.
-     * @see de.escidoc.core.common.util.xml.stax.handler.DefaultHandler#characters
-     *      (java.lang.String,
-     *      de.escidoc.core.common.util.xml.stax.events.StartElement)
-     * @om
      */
-    public String characters(final String s, final StartElement element) {
-        String userNamePath = "/user-account/properties/name";
-        String currentPath = parser.getCurPath();
+	public UserNameHandler(final StaxParser parser) {
+		this.parser = parser;
 
-        if (userNamePath.equals(currentPath)) {
-        	userName = s;
-        }
-        return s;
-    }
+	}
+
+	/**
+	 * Handle the character section of an element.
+	 * 
+	 * @param s
+	 *            The contents of the character section.
+	 * @param element
+	 *            The element.
+	 * @return The character section.
+	 * @see de.escidoc.core.common.util.xml.stax.handler.DefaultHandler#characters
+	 *      (java.lang.String,
+	 *      de.escidoc.core.common.util.xml.stax.events.StartElement)
+	 */
+	public String characters(final String s, final StartElement element) {
+
+		if (USER_NAME_PATH.equals(parser.getCurPath())) {
+			userName = s;
+		}
+		return s;
+	}
 
 	/**
 	 * @return the contextName
@@ -77,6 +77,5 @@ public class UserNameHandler extends DefaultHandler {
 	public String getUserName() {
 		return userName;
 	}
-    
 
 }

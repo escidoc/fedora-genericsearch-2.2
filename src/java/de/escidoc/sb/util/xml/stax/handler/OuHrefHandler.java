@@ -45,22 +45,19 @@ public class OuHrefHandler extends DefaultHandler {
 
     protected Vector<String> hrefs = new Vector<String>();
 
+    private static final String OU_REF_PATH = "/organizational-unit-path-list/organizational-unit-path/organizational-unit-ref";
+
     /*
      * 
-     */public OuHrefHandler(StaxParser parser) {
+     */
+    public OuHrefHandler(StaxParser parser) {
         this.parser = parser;
 
     }
 
     public StartElement startElement(StartElement element) {
 
-        String ouRefPath = 
-        	"/organizational-unit-path-list/"
-        	+ "organizational-unit-path/"
-        	+ "organizational-unit-ref";
-        String currentPath = parser.getCurPath();
-
-        if (ouRefPath.equals(currentPath)) {
+        if (OU_REF_PATH.equals(parser.getCurPath())) {
             int indexOfHref = element.indexOfAttribute(XLINK_URI, "href");
             if (indexOfHref != (-1)) {
                 Attribute href = element.getAttribute(indexOfHref);

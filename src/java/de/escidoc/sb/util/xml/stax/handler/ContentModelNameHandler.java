@@ -37,13 +37,16 @@ public class ContentModelNameHandler extends DefaultHandler {
 
     public static final String XLINK_URI = "http://www.w3.org/1999/xlink";
 
+    private static final String CONTENT_MODEL_NAME_PATH = "/content-model/properties/name";
+
     protected StaxParser parser;
 
     protected String contentModelName;
 
     /*
      * 
-     */public ContentModelNameHandler(StaxParser parser) {
+     */
+    public ContentModelNameHandler(final StaxParser parser) {
         this.parser = parser;
 
     }
@@ -59,16 +62,10 @@ public class ContentModelNameHandler extends DefaultHandler {
      * @see de.escidoc.core.common.util.xml.stax.handler.DefaultHandler#characters
      *      (java.lang.String,
      *      de.escidoc.core.common.util.xml.stax.events.StartElement)
-     * @om
      */
     public String characters(final String s, final StartElement element) {
-        String contentModelNamePath = 
-        	"/content-model/"
-        	+ "properties/"
-        	+ "name";
-        String currentPath = parser.getCurPath();
 
-        if (contentModelNamePath.equals(currentPath)) {
+        if (CONTENT_MODEL_NAME_PATH.equals(parser.getCurPath())) {
         	contentModelName = s;
         }
         return s;

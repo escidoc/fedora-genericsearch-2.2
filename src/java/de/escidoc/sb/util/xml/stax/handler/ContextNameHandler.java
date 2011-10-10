@@ -41,6 +41,8 @@ public class ContextNameHandler extends DefaultHandler {
 
     protected String contextName;
 
+    private static final String CONTEXT_NAME_PATH = "/properties/name";
+
     /*
      * 
      */public ContextNameHandler(StaxParser parser) {
@@ -62,10 +64,8 @@ public class ContextNameHandler extends DefaultHandler {
      * @om
      */
     public String characters(final String s, final StartElement element) {
-        String contextNamePath = "/properties/name";
-        String currentPath = parser.getCurPath();
 
-        if (contextNamePath.equals(currentPath)) {
+        if (CONTEXT_NAME_PATH.equals(parser.getCurPath())) {
         	contextName = s;
         }
         return s;
