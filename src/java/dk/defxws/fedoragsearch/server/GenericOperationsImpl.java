@@ -240,7 +240,7 @@ public class GenericOperationsImpl implements Operations {
                     " resultPageXslt="+resultPageXslt);
         StringBuffer resultXml = new StringBuffer();
         String repositoryName = repositoryNameParam;
-        if (repositoryNameParam==null || repositoryNameParam.equals(""))
+        if (repositoryNameParam==null || repositoryNameParam.isEmpty())
         	repositoryName = config.getRepositoryName(repositoryName);
         resultXml.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
         resultXml.append("<resultPage");
@@ -434,7 +434,7 @@ public class GenericOperationsImpl implements Operations {
             }
         }
         if (response != null && response.getEntityInputStream() != null) {
-            dsBuffer = (TransformerToText.getText(response.getEntityInputStream(), mimetype));
+            dsBuffer = TransformerToText.getText(response.getEntityInputStream(), mimetype);
         }
         if (logger.isDebugEnabled())
             logger.debug("getDatastreamText" +
@@ -713,7 +713,7 @@ public class GenericOperationsImpl implements Operations {
         try {
             String resolvedXsltName = 
                 config.getUpdateIndexDocXslt(indexName, xsltName);
-            if (resolvedXsltName == null || resolvedXsltName.equals("")) {
+            if (resolvedXsltName == null || resolvedXsltName.isEmpty()) {
                 throw new Exception("UpdateIndexDocXslt may not be null");
             }
             if (resolvedXsltName.startsWith("http")) {
