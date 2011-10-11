@@ -13,9 +13,11 @@ import static com.yourmediashelf.fedora.client.FedoraClient.getDissemination;
 import static com.yourmediashelf.fedora.client.FedoraClient.listDatastreams;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.Date;
@@ -312,15 +314,8 @@ public class GenericOperationsImpl implements Operations {
             
             out = new FileOutputStream(tempFile);
             
-            if (inStr != null) {
-                byte[] bytes = new byte[0xFFFF];
-                int i = -1;
-                while ((i = inStr.read(bytes)) > -1) {
-                    out.write(bytes, 0, i);
-                }
-                out.flush();
-                out.close();
-                setFoxmlRecord(tempFile);
+            if(write (inStr, out) > 0) {
+            	setFoxmlRecord(tempFile);
             }
             
             if (logger.isDebugEnabled()) {
@@ -388,28 +383,6 @@ public class GenericOperationsImpl implements Operations {
         String mimetype = "";
     	FedoraResponse response = null;
         if (dsId != null) {
-//            try {
-//                FedoraAPIA apia = getAPIA(
-//                		repositoryName, 
-//                		fedoraSoap, 
-//                		fedoraUser,
-//                		fedoraPass,
-//                		trustStorePath,
-//                		trustStorePass );
-//                MIMETypedStream mts = apia.getDatastreamDissemination(pid, 
-//                        dsId, null);
-//                if (mts==null) return "";
-//                ds = mts.getStream();
-//                mimetype = mts.getMIMEType();
-//            } catch (AxisFault e) {
-//                if (e.getFaultString().indexOf("DatastreamNotFoundException")>-1 ||
-//                        e.getFaultString().indexOf("DefaulAccess")>-1)
-//                    return new String();
-//                else
-//                    throw new GenericSearchException(e.getFaultString()+": "+e.toString());
-//            } catch (RemoteException e) {
-//                throw new GenericSearchException(e.getClass().getName()+": "+e.toString());
-//            }
         	//MIH: REST
             try {
             	com.yourmediashelf.fedora.client.FedoraClient restClient = 
@@ -433,16 +406,61 @@ public class GenericOperationsImpl implements Operations {
                 throw new GenericSearchException(e.getClass().getName()+": "+e.toString());
             }
         }
-        if (response != null && response.getEntityInputStream() != null) {
-            dsBuffer = TransformerToText.getText(response.getEntityInputStream(), mimetype);
+		if (response != null && response.getEntityInputStream() != null) {
+			// transformToText takes to long to process input stream direct
+			try {
+				File tempFile = File.createTempFile("fedoragsearch", "out");
+				tempFile.deleteOnExit();
+				InputStream in = response.getEntityInputStream();
+				FileOutputStream out = new FileOutputStream(tempFile);
+	        	write(in, out);
+	        	in.close();
+	        	out.close();
+
+	        	in = new FileInputStream(tempFile);
+	            dsBuffer = TransformerToText.getText(in, mimetype);
+	            in.close();
+	            tempFile.delete();	            
+			} catch (IOException e) {
+				logger.error(e);
+				throw new GenericSearchException(e.getClass().getName() + ": "
+						+ e.toString());
+			}
         }
-        if (logger.isDebugEnabled())
+        if (logger.isDebugEnabled()) {
             logger.debug("getDatastreamText" +
                     " pid="+pid+
                     " dsId="+dsId+
                     " mimetype="+mimetype+
                     " dsBuffer="+dsBuffer.toString());
+        }
         return dsBuffer;
+    }
+    
+    /**
+     * Write input stream to output stream
+     * 
+     * @param in
+     * @param out
+     * @return written bytes
+     * @throws IOException
+     */
+    private long write(final InputStream in, final OutputStream out) throws IOException {
+    	
+    	long size = 0;
+    	
+        if (in != null) {
+            byte[] bytes = new byte[0xFFFF];
+            int i = -1;
+            while ((i = in.read(bytes)) > -1) {
+                out.write(bytes, 0, i);
+                size += i;
+            }
+            out.flush();
+            out.close();
+        }
+        
+        return size;
     }
     
     public Stream getFirstDatastreamText(
