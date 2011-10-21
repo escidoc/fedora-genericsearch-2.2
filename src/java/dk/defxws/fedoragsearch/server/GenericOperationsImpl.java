@@ -207,7 +207,7 @@ public class GenericOperationsImpl implements Operations {
         String xsltPath = config.getConfigName()
         		+"/repository/"+config.getRepositoryName(repositoryName)+"/"
         		+config.getRepositoryInfoResultXslt(repositoryName, resultPageXslt);
-        Stream sb = (new GTransformer()).transform(
+        Stream sb = new GTransformer().transform(
         		xsltPath,
                 new StreamSource(repositoryStream),
                 new String[] {});
@@ -583,7 +583,7 @@ public class GenericOperationsImpl implements Operations {
             }
         }
         if (response != null && response.getEntityInputStream() != null) {
-            dsBuffer = (TransformerToText.getText(response.getEntityInputStream(), mimetype));
+            dsBuffer = TransformerToText.getText(response.getEntityInputStream(), mimetype);
         }
         if (logger.isDebugEnabled())
             logger.debug("getFirstDatastreamText" +

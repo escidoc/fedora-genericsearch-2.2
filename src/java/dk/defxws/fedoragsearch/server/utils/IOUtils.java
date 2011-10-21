@@ -142,6 +142,7 @@ public final class IOUtils {
         StringBuffer resultXml = new StringBuffer();
         try {
             stream.writeCacheTo(resultXml);
+            stream.close();
         } catch(IOException e) {
             throw new GenericSearchException("Error converting Stream to string.", e);
         }

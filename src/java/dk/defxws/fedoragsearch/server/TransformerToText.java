@@ -143,7 +143,7 @@ public final class TransformerToText {
                 Config.getCurrentConfig().getIgnoreTextExtractionErrors());
         Stream docText = new Stream();
         try {
-            IOUtils.copy(input, docText);
+            IOUtils.copyAndCloseInput(input, docText);
             docText.lock();
         } catch(IOException e) {
             if (errorFlag) {

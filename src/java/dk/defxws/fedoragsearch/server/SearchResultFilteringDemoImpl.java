@@ -73,7 +73,7 @@ public class SearchResultFilteringDemoImpl implements SearchResultFiltering {
     		StringBuffer resultSetXml,
     		Config config) 
     throws java.rmi.RemoteException {
-    	StringBuffer result = resultSetXml;
+
     	//foreach hit in resultset, evaluate XACML policies, if not deny (~permit) then include in result
     	DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     	DocumentBuilder builder = null;
@@ -149,12 +149,11 @@ public class SearchResultFilteringDemoImpl implements SearchResultFiltering {
 		}
 		gfindObjectsElement.setAttribute("hitsDenied", Integer.toString(hitsDenied));
         String xsltPath = config.getConfigName()+"/index/"+config.getIndexName(null)+"/copyXml";
-        Stream stream = (new GTransformer()).transform(
+        Stream stream = new GTransformer().transform(
         		xsltPath,
         		new DOMSource(document),
         		new String[0]);
-        result = IOUtils.convertStreamToStringBuffer(stream);
-    	return result;
+        return IOUtils.convertStreamToStringBuffer(stream);
     }
     
     private String getUserRole(String fgsUserName) {
