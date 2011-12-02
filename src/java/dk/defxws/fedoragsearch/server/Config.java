@@ -43,6 +43,7 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.xalan.processor.TransformerFactoryImpl;
 import org.slf4j.Logger;
@@ -1229,6 +1230,17 @@ public class Config {
 		} catch (NumberFormatException e) {
 		}
     	return maxBufferedDocs;
+    }
+    
+    public double getRamBufferSize(String indexName) {
+    	double ramBufferSize = IndexWriterConfig.DEFAULT_RAM_BUFFER_SIZE_MB;
+    	
+		try {
+			ramBufferSize = Double.parseDouble(getIndexProps(indexName).getProperty("fgsindex.ramBufferSize"));
+		} catch (NumberFormatException e) {
+		} catch (NullPointerException e) {
+		}
+    	return ramBufferSize;
     }
     
     public long getDefaultWriteLockTimeout(String indexName) {

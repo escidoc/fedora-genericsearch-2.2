@@ -202,7 +202,7 @@ public class UpdateListener extends HttpServlet implements MessagingListener {
                                     repositoryName,
                                     indexName,
                                     indexDocXslt,
-                                    resultPageXslt);
+                                    resultPageXslt, true);
             logger.info("Index updated by notification message, returning:\n"
                       + updateStaus);
         } catch (RemoteException re) {

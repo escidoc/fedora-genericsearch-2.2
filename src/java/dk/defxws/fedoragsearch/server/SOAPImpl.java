@@ -144,7 +144,8 @@ public class SOAPImpl implements Operations {
             String repositoryName,
             String indexName,
             String indexDocXslt,
-            String resultPageXslt)
+            String resultPageXslt,
+            boolean commitWrite)
     throws java.rmi.RemoteException {
     	Date startTime = new Date();
         if (logger.isInfoEnabled())
@@ -157,7 +158,7 @@ public class SOAPImpl implements Operations {
                     " resultPageXslt="+resultPageXslt);
         GenericOperationsImpl ops = (new GenericOperationsImpl());
         ops.init(indexName, getConfig());
-        String result = ops.updateIndex(action, value, repositoryName, indexName, indexDocXslt, resultPageXslt);
+        String result = ops.updateIndex(action, value, repositoryName, indexName, indexDocXslt, resultPageXslt, commitWrite);
         String timeusedms = Long.toString((new Date()).getTime() - startTime.getTime());
         if (logger.isInfoEnabled())
             logger.info("updateIndex" +

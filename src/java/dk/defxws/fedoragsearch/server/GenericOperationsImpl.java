@@ -319,7 +319,8 @@ public class GenericOperationsImpl implements Operations {
             String repositoryNameParam,
             String indexNames,
             String indexDocXslt,
-            String resultPageXslt)
+            String resultPageXslt,
+            boolean commit)
     throws java.rmi.RemoteException {
         if (logger.isDebugEnabled())
             logger.debug("updateIndex" +
@@ -347,7 +348,7 @@ public class GenericOperationsImpl implements Operations {
         while (st.hasMoreTokens()) {
             String indexName = st.nextToken();
             Operations ops = config.getOperationsImpl(fgsUserName, indexName);
-            resultXml.append(ops.updateIndex(action, value, repositoryName, indexName, indexDocXslt, resultPageXslt));
+            resultXml.append(ops.updateIndex(action, value, repositoryName, indexName, indexDocXslt, resultPageXslt, commit));
         }
         resultXml.append("</resultPage>\n");
         if (logger.isDebugEnabled())

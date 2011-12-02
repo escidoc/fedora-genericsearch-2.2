@@ -61,6 +61,7 @@ public class RESTImpl extends HttpServlet {
     private static final String OP_BROWSEINDEX = "browseIndex";
     //MIH: added
     private static final String OP_FLUSHURLRESOURCES = "flushUrlResources";
+
     private static final String PARAM_CONFIGNAME = "configName";
     private static final String PARAM_OPERATION = "operation";
     private static final String PARAM_QUERY = "query";
@@ -76,6 +77,7 @@ public class RESTImpl extends HttpServlet {
     private static final String PARAM_FIELDNAME = "fieldName";
     private static final String PARAM_ACTION = "action";
     private static final String PARAM_VALUE = "value";
+    private static final String PARAM_COMMITINDEXWRITES = "commitWrite";
     
     /** Exactly the same behavior as doGet */
     public void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -124,6 +126,8 @@ public class RESTImpl extends HttpServlet {
             //MIH: added    
             } else if (OP_FLUSHURLRESOURCES.equals(operation)) {
                 resultXml = new StringBuffer(flushUrlResources(request, response));
+
+            
             } else if ("configure".equals(operation)) {
                 resultXml = new StringBuffer(configure(request, response));
             } else if ("getIndexConfigInfo".equals(operation)) {
@@ -275,6 +279,8 @@ public class RESTImpl extends HttpServlet {
             restXslt = config.getDefaultUpdateIndexRestXslt();
         }
         String action = request.getParameter(PARAM_ACTION);
+        boolean commit = request.getParameter(PARAM_COMMITINDEXWRITES) == null 
+        						? true : new Boolean(request.getParameter(PARAM_COMMITINDEXWRITES));
         if (action==null) action="";
         String value = request.getParameter(PARAM_VALUE);
         if (value==null) value="";
@@ -282,7 +288,7 @@ public class RESTImpl extends HttpServlet {
         if (indexDocXslt==null) indexDocXslt="";
         GenericOperationsImpl ops = new GenericOperationsImpl();
         ops.init(request.getRemoteUser(), indexName, config);
-        String result = ops.updateIndex(action, value, repositoryName, indexName, indexDocXslt, resultPageXslt);
+        String result = ops.updateIndex(action, value, repositoryName, indexName, indexDocXslt, resultPageXslt, commit);
         return result;
     }
     
