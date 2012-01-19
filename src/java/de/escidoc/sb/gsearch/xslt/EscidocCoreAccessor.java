@@ -38,6 +38,7 @@ import javax.naming.AuthenticationException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.commons.codec.binary.StringUtils;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
@@ -123,6 +124,9 @@ public class EscidocCoreAccessor {
         }
         try {
             String result = getXml(restUri, accessAsAnonymousUser);
+            if (result == null || "".equals(result)) {
+            	return "";
+            }
             
             StaxParser sp = new StaxParser();
             ObjectAttributeHandler handler = new ObjectAttributeHandler(sp);
@@ -172,6 +176,9 @@ public class EscidocCoreAccessor {
                                     final String restUri,
                                     final String accessAsAnonymousUser) {
         String xml = getXml(restUri, accessAsAnonymousUser);
+        if (xml == null || "".equals(xml)) {
+        	return null;
+        }
         Document result = null;
         DocumentBuilderFactory docBuilderFactory =
             DocumentBuilderFactory.newInstance();
@@ -228,8 +235,7 @@ public class EscidocCoreAccessor {
             return response;
         }
         catch (Exception e) {
-            log.error("object with uri " + restUri + " not found");
-            log.error(e);
+            log.error("object with uri " + restUri + " not found: " + e.getMessage());
         }
         return "";
     }
