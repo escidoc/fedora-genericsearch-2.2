@@ -26,7 +26,6 @@
     <property name="lib.dir" location="lib"/>
 	<property name="app.name" value="fedoragsearch" />
 	<property name="war.name" value="${app.name}.war" />
-	<property name="nolibs.war.name" value="${app.name}-nolibs.war" />
 
 	<property name="junit.build.dir"		   location="${build.basedir}/junit"/>
 	<property name="junit.src.dir"             location="src/test/junit"/>
@@ -213,7 +212,6 @@
 		<copy file="lib/fedora-rest-client/mime-util-2.1.3.jar" tofile="${build.dir}/WEB-INF/lib/mime-util-2.1.3.jar" />
 		<copy file="lib/fedora-rest-client/mimepull-1.4.jar" tofile="${build.dir}/WEB-INF/lib/mimepull-1.4.jar" />
 
-		<jar jarfile="${dist.dir}/${nolibs.war.name}" basedir="${build.dir}"/>
 		<copy todir="${build.dir}/WEB-INF/lib" flatten="true">
 			<fileset dir="lib" excludes="servlet-api.jar"/>
 		</copy>

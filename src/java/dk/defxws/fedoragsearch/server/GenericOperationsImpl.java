@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -499,7 +500,9 @@ public class GenericOperationsImpl implements Operations {
                 		fedoraSoap, 
                 		fedoraUser,
                 		fedoraPass );
-            	response = getDatastreamDissemination(pid, dsId).execute(restClient);
+            	//Workaround because tomcat doesnt support url-encoded / by default
+            	dsId = dsId.replaceAll("\\/","\\|");
+            	response = getDatastreamDissemination(pid, URLEncoder.encode(dsId, de.escidoc.sb.common.Constants.XML_CHARACTER_ENCODING)).execute(restClient);
                 mimetype = response.getMimeType();
                 if (logger.isDebugEnabled()) {
             		logger.debug("getting datastream dissemination needed " + (System.currentTimeMillis() - time));
@@ -636,7 +639,8 @@ public class GenericOperationsImpl implements Operations {
                 		fedoraSoap, 
                 		fedoraUser,
                 		fedoraPass );
-            	response = getDatastreamDissemination(pid, dsID).execute(restClient);
+            	dsID = dsID.replaceAll("\\/","\\|");
+            	response = getDatastreamDissemination(pid, URLEncoder.encode(dsID, de.escidoc.sb.common.Constants.XML_CHARACTER_ENCODING)).execute(restClient);
                 mimetype = response.getMimeType();
 
             } catch (FedoraClientException e) {
