@@ -214,6 +214,9 @@ public class EscidocCoreAccessor {
         if (log.isDebugEnabled()) {
             log.debug("executing EscidocCoreAccessor, getXml");
         }
+        if (restUri == null || restUri.isEmpty()) {
+        	return "";
+        }
         BasicClientCookie cookie = null;
         try {
             if (accessAsAnonymousUser == null 
