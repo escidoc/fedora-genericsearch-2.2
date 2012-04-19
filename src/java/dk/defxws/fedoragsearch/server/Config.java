@@ -1371,13 +1371,20 @@ public class Config {
                 //if property not found
                 //String systemPropertyValue = System.getProperty(systemProperty, "?NOTFOUND{"+systemProperty+"}");
                 String systemPropertyValue = System.getProperty(systemProperty);
+
                 if (systemPropertyValue == null) {
                     try {
                         systemPropertyValue = EscidocConfiguration.getInstance().get(
-                                systemProperty, "?NOTFOUND{"+systemProperty+"}");
+                                systemProperty);
                     } catch (IOException e) {
                         throw new IllegalArgumentException(e);
                     }
+                }
+                if (systemPropertyValue == null) {
+                	systemPropertyValue = System.getenv(systemProperty);
+                }
+                if (systemPropertyValue == null) {
+                	systemPropertyValue = "?NOTFOUND{"+systemProperty+"}";
                 }
         		result = result.substring(0, i) + systemPropertyValue + result.substring(j+1);
     		}
