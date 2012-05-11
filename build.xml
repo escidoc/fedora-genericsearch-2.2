@@ -20,7 +20,8 @@
 
 	<property name="build.dir" location="${build.basedir}/webapp" />
 	<property name="plugin.dir" location="${build.dir}/WEB-INF/classes" />
-	<property name="project.dir" location="${build.basedir}/eclipseprojects/FedoraGenericSearch${genericsearch.version}" />
+  <property name="eclipseprojects.dir" location="${build.basedir}/eclipseprojects" />
+	<property name="project.dir" location="${eclipseprojects.dir}/FedoraGenericSearch${genericsearch.version}" />
 	<property name="tomcat.basename" value="tomcat" />
 	<property name="dist.dir" location="dist" />
     <property name="lib.dir" location="lib"/>
@@ -117,6 +118,8 @@
 		<delete dir="${dist.dir}" />
 		<delete dir="${build.dir}" />
 		<delete dir="${project.dir}" />
+    <delete dir="${eclipseprojects.dir}" />
+    <mkdir dir="${eclipseprojects.dir}" />
 		<mkdir dir="${dist.dir}" />
 		<copy file="src/html/search-service.html" tofile="${build.dir}/index.html" />
 		<!--copy file="../FgsConfig/configvalues.xml" todir="${build.dir}" /-->
