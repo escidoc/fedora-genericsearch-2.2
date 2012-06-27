@@ -516,14 +516,14 @@ public class GenericOperationsImpl implements Operations {
                 }
                 mimetype = response.getMimeType();
 
-            } catch (FedoraClientException e) {
-                if (e.getMessage().indexOf("no path")>-1 ||
-                        e.getMessage().indexOf("DefaulAccess")>-1)
-                    return new String();
-                else
+            } catch (Exception e) {
+				if (Boolean.parseBoolean(Config.getCurrentConfig()
+						.getIgnoreTextExtractionErrors())) {
+					logger.warn(e);
+					return "textfromfilenotextractable textfrompdffilenotextractable";
+				} else {
                     throw new GenericSearchException(e.getClass().getName()+": "+e.toString());
-            } catch (IOException e) {
-                throw new GenericSearchException(e.getClass().getName()+": "+e.toString());
+				}
             } finally {
                 if (inStr != null) {
                     try {
@@ -675,10 +675,14 @@ public class GenericOperationsImpl implements Operations {
                 }
                 mimetype = response.getMimeType();
 
-            } catch (FedoraClientException e) {
-                throw new GenericSearchException(e.getClass().getName()+": "+e.toString());
-            } catch (IOException e) {
-                throw new GenericSearchException(e.getClass().getName()+": "+e.toString());
+            } catch (Exception e) {
+    			if (Boolean.parseBoolean(Config.getCurrentConfig()
+    					.getIgnoreTextExtractionErrors())) {
+    				logger.warn(e);
+    				return new StringBuffer("textfromfilenotextractable textfrompdffilenotextractable");
+    			} else {
+                    throw new GenericSearchException(e.getClass().getName()+": "+e.toString());
+    			}
             } finally {
                 if (inStr != null) {
                     try {
@@ -827,14 +831,14 @@ public class GenericOperationsImpl implements Operations {
               logger.debug("getDisseminationText" +
                       " mimetype="+mimetype);
 
-            } catch (FedoraClientException e) {
-				if (e.toString().indexOf("DisseminatorNotFoundException") > -1) {
-					return new StringBuffer();
-				} else {
-					throw new GenericSearchException(e.toString());
-				}
-            } catch (IOException e) {
-                throw new GenericSearchException(e.getClass().getName()+": "+e.toString());
+            } catch (Exception e) {
+    			if (Boolean.parseBoolean(Config.getCurrentConfig()
+    					.getIgnoreTextExtractionErrors())) {
+    				logger.warn(e);
+    				return new StringBuffer("textfromfilenotextractable textfrompdffilenotextractable");
+    			} else {
+                    throw new GenericSearchException(e.getClass().getName()+": "+e.toString());
+    			}
             } finally {
                 if (inStr != null) {
                     try {
