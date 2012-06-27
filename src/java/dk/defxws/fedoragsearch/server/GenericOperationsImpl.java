@@ -396,14 +396,23 @@ public class GenericOperationsImpl implements Operations {
                 if (logger.isDebugEnabled()) {
             		logger.debug("getting datastream dissemination needed " + (System.currentTimeMillis() - time));
                 }
-            } catch (FedoraClientException e) {
-                if (e.getMessage().indexOf("no path")>-1 ||
-                        e.getMessage().indexOf("DefaulAccess")>-1)
-                    return new Stream();
-                else
+            } catch (Exception e) {
+    			if (Boolean.parseBoolean(Config.getCurrentConfig()
+    					.getIgnoreTextExtractionErrors())) {
+    				logger.warn(e);
+    				Stream stream = new Stream();
+    				try {
+        				stream.write("textfromfilenotextractable".getBytes(
+        						de.escidoc.sb.common.Constants.XML_CHARACTER_ENCODING));
+        				stream.lock();
+    				}
+    				catch (Exception ex) {
+    					logger.error("couldnt write error-stream " + ex.toString());
+    				}
+    				return stream;
+    			} else {
                     throw new GenericSearchException(e.getClass().getName()+": "+e.toString());
-            } catch (IOException e) {
-                throw new GenericSearchException(e.getClass().getName()+": "+e.toString());
+    			}
             }
         }
 		if (response != null && response.getEntityInputStream() != null) {
@@ -576,10 +585,23 @@ public class GenericOperationsImpl implements Operations {
             	response = getDatastreamDissemination(pid, dsID).execute(restClient);
                 mimetype = response.getMimeType();
 
-            } catch (FedoraClientException e) {
-                throw new GenericSearchException(e.getClass().getName()+": "+e.toString());
-            } catch (IOException e) {
-                throw new GenericSearchException(e.getClass().getName()+": "+e.toString());
+            } catch (Exception e) {
+    			if (Boolean.parseBoolean(Config.getCurrentConfig()
+    					.getIgnoreTextExtractionErrors())) {
+    				logger.warn(e);
+    				Stream stream = new Stream();
+    				try {
+        				stream.write("textfromfilenotextractable".getBytes(
+        						de.escidoc.sb.common.Constants.XML_CHARACTER_ENCODING));
+        				stream.lock();
+    				}
+    				catch (Exception ex) {
+    					logger.error("couldnt write error-stream " + ex.toString());
+    				}
+    				return stream;
+    			} else {
+                    throw new GenericSearchException(e.getClass().getName()+": "+e.toString());
+    			}
             }
         }
         if (response != null && response.getEntityInputStream() != null) {
@@ -704,14 +726,23 @@ public class GenericOperationsImpl implements Operations {
               logger.debug("getDisseminationText" +
                       " mimetype="+mimetype);
 
-            } catch (FedoraClientException e) {
-				if (e.toString().indexOf("DisseminatorNotFoundException") > -1) {
-					return new Stream();
-				} else {
-					throw new GenericSearchException(e.toString());
-				}
-            } catch (IOException e) {
-                throw new GenericSearchException(e.getClass().getName()+": "+e.toString());
+            } catch (Exception e) {
+    			if (Boolean.parseBoolean(Config.getCurrentConfig()
+    					.getIgnoreTextExtractionErrors())) {
+    				logger.warn(e);
+    				Stream stream = new Stream();
+    				try {
+        				stream.write("textfromfilenotextractable".getBytes(
+        						de.escidoc.sb.common.Constants.XML_CHARACTER_ENCODING));
+        				stream.lock();
+    				}
+    				catch (Exception ex) {
+    					logger.error("couldnt write error-stream " + ex.toString());
+    				}
+    				return stream;
+    			} else {
+                    throw new GenericSearchException(e.getClass().getName()+": "+e.toString());
+    			}
             }
         }
         if (response != null && response.getEntityInputStream() != null) {
