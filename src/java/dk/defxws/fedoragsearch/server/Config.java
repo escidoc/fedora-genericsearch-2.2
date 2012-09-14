@@ -1234,6 +1234,33 @@ public class Config {
     	return maxBufferedDocs;
     }
     
+    public int getMaxMergeDocs(String indexName) {
+    	int maxMergeDocs = 1;
+		try {
+			maxMergeDocs = Integer.parseInt(getIndexProps(indexName).getProperty("fgsindex.maxMergeDocs"));
+		} catch (NumberFormatException e) {
+		}
+    	return maxMergeDocs;
+    }
+    
+    public int getMaxMergeMb(String indexName) {
+    	int maxMergeMb = 1;
+		try {
+			maxMergeMb = Integer.parseInt(getIndexProps(indexName).getProperty("fgsindex.maxMergeMb"));
+		} catch (NumberFormatException e) {
+		}
+    	return maxMergeMb;
+    }
+    
+    public int getMaxChunkSize(String indexName) {
+    	int maxChunkSize = 1;
+		try {
+			maxChunkSize = Integer.parseInt(getIndexProps(indexName).getProperty("fgsindex.maxChunkSize"));
+		} catch (NumberFormatException e) {
+		}
+    	return maxChunkSize;
+    }
+    
     public long getDefaultWriteLockTimeout(String indexName) {
     	long defaultWriteLockTimeout = 1;
 		try {
