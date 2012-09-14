@@ -3,6 +3,7 @@
 <project name="FedoraGenericSearch" default="binrelease" basedir="." xmlns:artifact="antlib:org.apache.maven.artifact.ant">
 	<description>Fedora Generic Search Service</description>
 
+    <property name="escidoc.version" value="-trunk"/>
     <property environment="env"/>
     <property name="web.xml.file"              value="web-withoutAuthN.xml"/> <!-- or web-withAuthN.xml -->
     <property name="javac.debug"               value="on"/>
@@ -16,6 +17,9 @@
     <property name="genericsearch.version" value="2.2"/>
 
     <property name="build.basedir" location="../FgsBuild"/>
+    <property name="project.lucene.dir" location="../fgs-lucene-2.2${escidoc.version}"/>
+    <property name="project.solr.dir" location="../fgs-solr-22.2${escidoc.version}"/>
+    <property name="project.zebra.dir" location="../fgs-zebra-2.2${escidoc.version}"/>
     <property name="compile.dir" location="bin"/>
 
 	<property name="build.dir" location="${build.basedir}/webapp" />
@@ -96,8 +100,8 @@
 
     <target name="clean"
             description="removes build-generated artifacts">
-		<delete dir="../FgsLucene${genericsearch.version}/bin"/>
-		<delete dir="../FgsSolr2${genericsearch.version}/bin"/>
+    <delete dir="../${project.lucene.dir}/bin"/>
+    <delete dir="../${project.solr.dir}/bin"/>
 		<delete dir="${compile.dir}"/>
 		<delete dir="${build.basedir}"/>
 		<delete dir="${dist.dir}"/>
@@ -258,8 +262,8 @@
 	</target>
 	
     <target name="includeengines" depends="">
-        <ant dir="../FgsLucene${genericsearch.version}" inheritAll="false"/>
-        <ant dir="../FgsSolr2${genericsearch.version}" inheritAll="false"/>
+      <ant dir="${project.lucene.dir}" inheritAll="false"/>
+      <ant dir="${project.solr.dir}" inheritAll="false"/>
         <!--ant dir="../FgsZebra" inheritAll="false"/-->
     </target>
 	
