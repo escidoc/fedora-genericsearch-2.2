@@ -1253,6 +1253,12 @@ public class Config {
     	return maxChunkSize;
     }
     
+    public String getLuceneDirectoryImplementation(String indexName) {
+    	String luceneDirectoryImplementation = null;
+		luceneDirectoryImplementation = getIndexProps(indexName).getProperty("fgsindex.lucene.directory.implementation");
+    	return luceneDirectoryImplementation;
+    }
+    
     public long getDefaultWriteLockTimeout(String indexName) {
     	long defaultWriteLockTimeout = 1;
 		try {
