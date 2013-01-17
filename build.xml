@@ -3,7 +3,6 @@
 <project name="FedoraGenericSearch for 1.3" default="binrelease" basedir=".">
 	<description>Fedora Generic Search Service</description>
 
-    <property name="escidoc.version" value="-1.3"/>
 	  <property environment="env"/>
     <property name="web.xml.file"              value="web-withoutAuthN.xml"/> <!-- or web-withAuthN.xml -->
     <property name="javac.debug"               value="on"/>
@@ -17,9 +16,9 @@
     <property name="genericsearch.version" value="2.2"/>
 
     <property name="build.basedir" location="../FgsBuild"/>
-    <property name="project.lucene.dir" location="../fgs-lucene-2.2${escidoc.version}"/>
-    <property name="project.solr.dir" location="../fgs-solr-22.2${escidoc.version}"/>
-    <property name="project.zebra.dir" location="../fgs-zebra-2.2${escidoc.version}"/>
+    <property name="project.lucene.dir" location="../fgs-lucene-2.2"/>
+    <property name="project.solr.dir" location="../fgs-solr-22.2"/>
+    <property name="project.zebra.dir" location="../fgs-zebra-2.2"/>
     <property name="compile.dir" location="bin"/>
 
 	<property name="build.dir" location="${build.basedir}/webapp" />
