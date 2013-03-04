@@ -122,8 +122,6 @@ public class RESTImpl extends HttpServlet {
                 resultXml = new StringBuffer(getIndexInfo(request, response));
             } else if (OP_UPDATEINDEX.equals(operation)) {
                 resultXml = new StringBuffer(updateIndex(request, response));
-            } else if (OP_BROWSEINDEX.equals(operation)) {
-                resultXml = new StringBuffer(browseIndex(request, response));
             //MIH: added    
             } else if (OP_FLUSHURLRESOURCES.equals(operation)) {
                 resultXml = new StringBuffer(flushUrlResources(request, response));
@@ -230,30 +228,6 @@ public class RESTImpl extends HttpServlet {
         }
         Operations ops = config.getOperationsImpl(request.getRemoteUser(), indexName);
         String result = ops.gfindObjects(query, hitPageStart, hitPageSize, snippetsMax, fieldMaxLength, indexName, sortFields,resultPageXslt);
-        return result;
-    }
-    
-    private String browseIndex(HttpServletRequest request, HttpServletResponse response)
-    throws java.rmi.RemoteException {
-        if (restXslt==null || restXslt.isEmpty()) {
-            restXslt = config.getDefaultBrowseIndexRestXslt();
-        }
-        String startTerm = request.getParameter(PARAM_STARTTERM);
-        if (startTerm==null) startTerm="";
-        
-        String fieldName = request.getParameter(PARAM_FIELDNAME);
-        if (fieldName==null) fieldName="";
-        
-        int termPageSize = config.getDefaultBrowseIndexTermPageSize();
-        if (request.getParameter(PARAM_TERMPAGESIZE)!=null) {
-            try {
-                termPageSize = Integer.parseInt(request.getParameter(PARAM_TERMPAGESIZE));
-            } catch (NumberFormatException nfe) {
-            }
-        }
-        if (termPageSize > config.getMaxPageSize()) termPageSize = config.getMaxPageSize();
-        Operations ops = config.getOperationsImpl(indexName);
-        String result = ops.browseIndex(startTerm, termPageSize, fieldName, indexName, resultPageXslt);
         return result;
     }
     

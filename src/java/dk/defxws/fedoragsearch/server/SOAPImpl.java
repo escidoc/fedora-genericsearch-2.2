@@ -67,35 +67,6 @@ public class SOAPImpl implements Operations {
         return result;
     }
     
-    public String browseIndex(
-            String startTerm,
-            int termPageSize,
-            String fieldName,
-            String indexName,
-            String resultPageXslt)
-    throws java.rmi.RemoteException {
-    	Date startTime = new Date();
-        if (logger.isInfoEnabled())
-            logger.info("browseIndex" +
-                    " startTerm="+startTerm+
-                    " termPageSize="+termPageSize+
-                    " fieldName="+fieldName+
-                    " indexName="+indexName+
-                    " resultPageXslt="+resultPageXslt);
-        Operations ops = getConfig().getOperationsImpl(indexName);
-        String result = ops.browseIndex(startTerm, termPageSize, fieldName, indexName, resultPageXslt);
-        String timeusedms = Long.toString((new Date()).getTime() - startTime.getTime());
-        if (logger.isInfoEnabled())
-            logger.info("browseIndex" +
-                    " startTerm="+startTerm+
-                    " termPageSize="+termPageSize+
-                    " fieldName="+fieldName+
-                    " indexName="+indexName+
-                    " resultPageXslt="+resultPageXslt+
-                    " timeusedms="+timeusedms);
-        return result;
-    }
-    
     public String getRepositoryInfo(
             String repositoryName,
             String resultPageXslt)

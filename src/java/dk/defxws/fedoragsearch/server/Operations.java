@@ -33,13 +33,6 @@ public interface Operations {
             String sortFields,
             String resultPageXslt) throws java.rmi.RemoteException;
     
-    public String browseIndex(
-            String startTerm,
-            int termPageSize,
-            String fieldName,
-            String indexName,
-            String resultPageXslt) throws java.rmi.RemoteException;
-    
     public String getRepositoryInfo(
             String repositoryName,
             String resultPageXslt) throws java.rmi.RemoteException;
