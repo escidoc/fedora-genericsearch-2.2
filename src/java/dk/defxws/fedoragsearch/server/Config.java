@@ -523,6 +523,7 @@ public class Config {
     				"fgsindex.snippetEnd",
     				"fgsindex.maxBufferedDocs",
     				"fgsindex.mergeFactor",
+    				"fgsindex.ramBufferSizeMb",
     				"fgsindex.defaultWriteLockTimeout",
     				"fgsindex.defaultSortFields",
     				"fgsindex.uriResolver"
@@ -1251,6 +1252,15 @@ public class Config {
 		} catch (NumberFormatException e) {
 		}
     	return maxChunkSize;
+    }
+    
+    public int getRamBufferSizeMb(String indexName) {
+        int ramBufferSizeMb = 1;
+        try {
+            ramBufferSizeMb = Integer.parseInt(getIndexProps(indexName).getProperty("fgsindex.ramBufferSizeMb"));
+        } catch (NumberFormatException e) {
+        }
+        return ramBufferSizeMb;
     }
     
     public String getLuceneDirectoryImplementation(String indexName) {
