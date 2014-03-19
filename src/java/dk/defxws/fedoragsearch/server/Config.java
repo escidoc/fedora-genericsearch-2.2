@@ -1263,7 +1263,7 @@ public class Config {
     }
     
     public int getRamBufferSizeMb(String indexName) {
-        int ramBufferSizeMb = 1;
+    	int ramBufferSizeMb = 1;
         try {
             ramBufferSizeMb = Integer.parseInt(getIndexProps(indexName).getProperty("fgsindex.ramBufferSizeMb"));
         } catch (NumberFormatException e) {
