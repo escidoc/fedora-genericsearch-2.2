@@ -16,8 +16,10 @@ import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
@@ -43,10 +45,13 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.FSDirectory;
 
 import de.escidoc.core.common.util.configuration.EscidocConfiguration;
+import de.escidoc.sb.common.lucene.analyzer.EscidocAnalyzer;
 import dk.defxws.fedoragsearch.server.errors.ConfigException;
+import dk.defxws.fedoragsearch.server.errors.GenericSearchException;
 
 /**
  * Reads and checks the configuration files,
@@ -64,6 +69,21 @@ import dk.defxws.fedoragsearch.server.errors.ConfigException;
  * @version
  */
 public class Config {
+	
+	public enum IndexMode {
+		STANDARD(0), 
+	    BULK_REINDEX(1);
+	    
+		private int code;
+		
+		private IndexMode(int c) {
+			code = c;
+		}
+		
+		int showCode() {
+			return code;
+		}	    
+	}
     
     private static Config currentConfig = null;
     
@@ -122,6 +142,8 @@ public class Config {
     private String searchResultFilteringModuleProperty = null;
     
     private StringBuffer errors = null;
+    
+    private static Map<String, Analyzer> analyzers = new HashMap<String, Analyzer>();
     
     private final Logger logger = Logger.getLogger(Config.class);
 
@@ -522,6 +544,7 @@ public class Config {
     				"fgsindex.maxBufferedDocs",
     				"fgsindex.mergeFactor",
     				"fgsindex.ramBufferSizeMb",
+    				"fgsindex.indexMode",
     				"fgsindex.defaultWriteLockTimeout",
     				"fgsindex.defaultSortFields",
     				"fgsindex.uriResolver"
@@ -603,6 +626,12 @@ public class Config {
     					Analyzer a = (Analyzer) analyzerClass
     					.getConstructor(new Class[] {})
     					.newInstance(new Object[] {});
+    					
+    					if (a instanceof EscidocAnalyzer && getIndexMode(indexName) == IndexMode.BULK_REINDEX) {
+    						((EscidocAnalyzer)a).setIndexMode(getIndexMode(indexName).showCode());
+    					}
+    					
+    					analyzers.put(indexName, a); 
     				} catch (InstantiationException e) {
     					errors.append("\n*** "+configName+"/index/"+indexName+" "+analyzer
     							+ ": fgsindex.analyzer="+analyzer
@@ -1263,12 +1292,24 @@ public class Config {
     }
     
     public int getRamBufferSizeMb(String indexName) {
-        int ramBufferSizeMb = 1;
+    	int ramBufferSizeMb = 1;
         try {
             ramBufferSizeMb = Integer.parseInt(getIndexProps(indexName).getProperty("fgsindex.ramBufferSizeMb"));
         } catch (NumberFormatException e) {
         }
         return ramBufferSizeMb;
+    }
+    
+    public IndexMode getIndexMode(String indexName) {
+    	IndexMode mode = IndexMode.STANDARD;
+        try {
+            if (Integer.parseInt(getIndexProps(indexName).getProperty("fgsindex.indexMode")) != 0)
+            	mode = IndexMode.BULK_REINDEX;
+        } catch (NumberFormatException e) {
+        	logger.info("Property fgsindex.indexMode not found or not set correctly for index " + indexName 
+        									+ ". Returning " + IndexMode.STANDARD);
+        }
+        return mode;
     }
     
     public String getLuceneDirectoryImplementation(String indexName) {
@@ -1491,6 +1532,18 @@ public class Config {
         }
         return this;
     }
+    
+    /**
+	 * get Analyzer Object from ClassName.
+	 * 
+	 * @param analyzerClassName
+	 *            name of Analyzer-class.
+	 * @throws GenericSearchException
+	 *             e
+	 */
+	public Analyzer getAnalyzerForIndex(String indexName) {
+		return analyzers.get(indexName);
+	}
     
     public static void main(String[] args) {
         try {

@@ -5,7 +5,7 @@
         
   <appender name="STDOUT" class="org.apache.log4j.ConsoleAppender">
     <layout class="org.apache.log4j.PatternLayout">
-      <param name="ConversionPattern" value="%p %d (%c{1}) %m%n"/>
+      <param name="ConversionPattern" value="%p %d (%c{1})(%t) %m%n"/>
     </layout>
   </appender>
   
@@ -13,7 +13,7 @@
     <param name="datePattern" value="'.'yyyy-MM-dd" />
     <param name="File" value="${catalina.home}/log/fedoragsearch.log"/>
     <layout class="org.apache.log4j.PatternLayout">
-      <param name="ConversionPattern" value="%p %d (%c{1}) %m%n"/>
+      <param name="ConversionPattern" value="%p %d (%c{1})(%t) %m%n"/>
     </layout>
   </appender>
   
