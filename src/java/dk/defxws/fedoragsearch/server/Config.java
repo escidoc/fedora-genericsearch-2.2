@@ -69,7 +69,7 @@ import dk.defxws.fedoragsearch.server.errors.GenericSearchException;
  * @version
  */
 public class Config {
-	// REINDEX mode for minimizing garbage collection
+
 	public enum IndexMode {
 		STANDARD(0), 
 	    BULK_REINDEX(1);
