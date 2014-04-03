@@ -629,6 +629,7 @@ public class Config {
     					
     					if (a instanceof EscidocAnalyzer && getIndexMode(indexName) == IndexMode.BULK_REINDEX) {
     						((EscidocAnalyzer)a).setIndexMode(getIndexMode(indexName).showCode());
+    						logger.info("Setting indexMode BULK_REINDEX for analyzer " + a);
     					}
     					
     					analyzers.put(indexName, a); 
@@ -1305,6 +1306,7 @@ public class Config {
         try {
             if (Integer.parseInt(getIndexProps(indexName).getProperty("fgsindex.indexMode")) != 0)
             	mode = IndexMode.BULK_REINDEX;
+            logger.info("Config.getIndexMode returning BULK_REINDEX for " + indexName); 
         } catch (NumberFormatException e) {
         	logger.info("Property fgsindex.indexMode not found or not set correctly for index " + indexName 
         									+ ". Returning " + IndexMode.STANDARD);
