@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--  $Id: build.xml 7851 2008-12-03 09:58:16Z gertsp $ -->
-<project name="FedoraGenericSearch for 1.3" default="binrelease" basedir=".">
+<project name="FedoraGenericSearch for 1.3" default="binrelease" basedir="." xmlns:artifact="antlib:org.apache.maven.artifact.ant">
 	<description>Fedora Generic Search Service</description>
 
     <property name="escidoc.version" value=""/>
@@ -34,7 +34,13 @@
 	<property name="nolibs.war.name" value="${app.name}-nolibs.war" />
 
 	<property name="junit.build.dir"		   location="${build.basedir}/junit"/>
-	<property name="junit.src.dir"             location="src/test/junit"/>
+	<property name="junit.src.dir"             location="src/test/junit"/>	
+
+	<!-- properties for deployment to Artifactory -->
+	<property name="artifactory.url" value="http://rd.mpdl.mpg.de/nexus/content/repositories/snapshots" />
+	<property name="artifactory.id" value="snapshots" />
+	<property name="build.version" value="1.3.44-SNAPSHOT" />
+
 	<!-- 
     <path id="compile.classpath">
       <pathelement path="${lib.axis}"/>
@@ -259,6 +265,24 @@
         <ant dir="${project.solr.dir}" inheritAll="false"/>
         <!--ant dir="../FgsZebra" inheritAll="false"/-->
     </target>
+	
+
+	<target name="install" depends="binrelease">
+		<artifact:pom id="memorypom" groupId="org.escidoc" artifactId="${app.name}" version="${build.version}" name="Fedoragsearch for eSciDoc" packaging="jar" />
+		<artifact:writepom pomRefId="memorypom" file="${dist.dir}/${app.name}-${build.version}.pom" />
+		<artifact:pom id="filepom" file="${dist.dir}/${app.name}-${build.version}.pom" />
+		<artifact:install file="${dist.dir}/${war.name}">
+			<pom refid="filepom" />
+		</artifact:install>
+	</target>
+
+	<target name="deploy" depends="install">
+		<!-- deploy war -->
+		<artifact:deploy file="${dist.dir}/${war.name}">
+			<remoteRepository url="${artifactory.url}" id="${artifactory.id}" />
+			<pom refid="filepom" />
+		</artifact:deploy>
+	</target>
 	
 	<target name="compile-junit" depends="compile">
 		<md-compile srcdir="${junit.src.dir}"
