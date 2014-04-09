@@ -268,7 +268,7 @@
 	
 
 	<target name="install" depends="binrelease">
-		<artifact:pom id="memorypom" groupId="org.escidoc" artifactId="${app.name}" version="${build.version}" name="Fedoragsearch for eSciDoc" packaging="jar" />
+		<artifact:pom id="memorypom" groupId="org.escidoc" artifactId="${app.name}" version="${build.version}" name="Fedoragsearch for eSciDoc" packaging="war" />
 		<artifact:writepom pomRefId="memorypom" file="${dist.dir}/${app.name}-${build.version}.pom" />
 		<artifact:pom id="filepom" file="${dist.dir}/${app.name}-${build.version}.pom" />
 		<artifact:install file="${dist.dir}/${war.name}">
