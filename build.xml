@@ -11,6 +11,8 @@
     <property name="javac.maxwarns"            value="100"/>
     <property name="javac.source"              value="1.5"/>
     <property name="javac.target"              value="1.5"/>
+	
+	<property name="sources.dir" 				value="sources" />
 
     <loadproperties srcFile="lib/lib.properties" /> 
 
@@ -138,6 +140,9 @@
 				<include name="*.jpg"/>
 			</fileset>
 		</copy>
+		<copy todir="${build.dir}/jsp">
+			<fileset dir="src/jsp"/>
+		</copy>				
 		<copy todir="${build.dir}">
 			<fileset dir="src/sh"/>
 		</copy>
@@ -156,6 +161,27 @@
 			<fileset dir="."/>
 		</copy>
 	</target>
+	
+	<target name="sources" description="Pack sources for download.">
+		<delete dir="${sources.dir}"/>
+		<mkdir dir="${sources.dir}"/>
+		<mkdir dir="${sources.dir}/${app.name}"/>
+		<copy todir="${sources.dir}/${app.name}">
+			<fileset dir=".">
+				<exclude name="${build.dir}/*/**"/>
+				<exclude name="${bin.dir}/*/**"/>
+				<exclude name="${dist.dir}/*/**"/>
+				<exclude name="${sources.dir}/**"/>
+				<exclude name="${docu.dir}/**"/>
+				<exclude name="**/.svn"/>
+				<exclude name=".classpath"/>
+				<exclude name=".project"/>
+			</fileset>
+		</copy>
+		<zip zipfile="${dist.dir}/${app.name}-sources.zip"
+           basedir="${sources.dir}/${app.name}" includes="**"/>
+		<delete dir="${sources.dir}"/>
+	</target>
 
     <target name="binrelease" depends="builddownload">
       <copy todir="${build.basedir}/release/genericsearch-${genericsearch.version}"
@@ -165,6 +191,7 @@
           <include name="index.html"/>
           <include name="css/**"/>
           <include name="images/**"/>
+          <include name="jsp/**"/>
         </fileset>
       </copy>
       <!--zip zipfile="${build.basedir}/release/${app.name}-${genericsearch.version}.zip"
@@ -267,17 +294,18 @@
     </target>
 	
 
-	<target name="install" depends="binrelease">
+	<target name="install" depends="binrelease, sources">
 		<artifact:pom id="memorypom" groupId="org.escidoc" artifactId="${app.name}" version="${build.version}" name="Fedoragsearch for eSciDoc" packaging="war" />
 		<artifact:writepom pomRefId="memorypom" file="${dist.dir}/${app.name}-${build.version}.pom" />
 		<artifact:pom id="filepom" file="${dist.dir}/${app.name}-${build.version}.pom" />
 		<artifact:install file="${dist.dir}/${war.name}">
 			<pom refid="filepom" />
+			<attach file="${dist.dir}/${app.name}-sources.zip" type="zip" classifier="sources"/>
 		</artifact:install>
 	</target>
 
 	<target name="deploy" depends="install">
-		<!-- deploy war -->
+		<!-- deploy war and sources -->
 		<artifact:deploy file="${dist.dir}/${war.name}">
 			<remoteRepository url="${artifactory.url}" id="${artifactory.id}" />
 			<pom refid="filepom" />
