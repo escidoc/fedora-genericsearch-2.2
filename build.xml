@@ -306,7 +306,7 @@
 
 	<target name="deploy" depends="install">
 		<!-- deploy war and sources -->
-		<artifact:deploy file="${dist.dir}/${war.name}">
+		<artifact:deploy file="${dist.dir}/${war.name}" uniqueVersion="false">
 			<remoteRepository url="${artifactory.url}" id="${artifactory.id}" />
 			<pom refid="filepom" />
 		</artifact:deploy>
