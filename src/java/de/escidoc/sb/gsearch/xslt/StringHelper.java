@@ -29,6 +29,7 @@
 
 package de.escidoc.sb.gsearch.xslt;
 
+import java.text.Normalizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -49,12 +50,7 @@ import org.w3c.dom.NodeList;
  */
 public class StringHelper {
 
-    private static Logger log;
-
-  //äöü
-    private static Pattern pattern = Pattern.compile(
-            "([\u00e4\u00f6\u00fc])");
-    private static Matcher matcher = pattern.matcher("");
+    private static Logger logger;
 
     private static final Pattern PATTERN_ID_WITHOUT_VERSION =
         Pattern.compile("([a-zA-Z0-9]+:[a-zA-Z0-9]+):[0-9]+");
@@ -63,7 +59,7 @@ public class StringHelper {
         PATTERN_ID_WITHOUT_VERSION.matcher("");
 
     static {
-        log =
+        logger =
             Logger
                 .getLogger(
                 de.escidoc.sb.gsearch.xslt.StringHelper.class);
@@ -110,7 +106,7 @@ public class StringHelper {
     }
 
     /**
-     * converts string to lower case, replaces all ä,ö,ü with ae, oe, ue
+     * converts to lower case and ascii if possible, otherwise leave at it is.
      * 
      * @param input
      *            input
@@ -120,13 +116,18 @@ public class StringHelper {
         if (input == null) {
             return null;
         }
-        String output = input.toLowerCase();
-        matcher.reset(output);
-        output = matcher.replaceAll("$1e");
-        output = output.replaceAll("\u00e4", "a");
-        output = output.replaceAll("\u00f6", "o");
-        output = output.replaceAll("\u00fc", "u");
-        return output;
+        
+        String normalizedString = Normalizer.normalize(input.toLowerCase(), Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "");
+		if (logger.isTraceEnabled()) {
+			logger.trace("getNormalizedString( " + input + " returning <"
+					+ normalizedString + ">");
+		}
+        
+        if (null == normalizedString || "".equals(normalizedString)) {
+        	return input;
+        }       
+        
+        return normalizedString;
     }
 
     /**
