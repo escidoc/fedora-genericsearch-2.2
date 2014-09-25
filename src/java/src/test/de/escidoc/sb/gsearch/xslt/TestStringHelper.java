@@ -45,6 +45,26 @@ public class TestStringHelper {
 		output = StringHelper.getNormalizedString("登録");
 		System.out.println("登録 <" + output + ">"); 
 		assertTrue(output.equals("登録"));
+		
+		output = StringHelper.getNormalizedString("Ё");
+		System.out.println("Ё <" + output + ">"); 
+		assertTrue(output.equals("Ё"));
+		
+		output = StringHelper.getNormalizedString("ß");
+		System.out.println("ß <" + output + ">"); 
+		assertTrue(output.equals("ß"));
+		
+		output = StringHelper.getNormalizedString("æ");
+		System.out.println("æ <" + output + ">"); 
+		assertTrue(output.equals("æ"));
+		
+		output = StringHelper.getNormalizedString("ø");
+		System.out.println("ø <" + output + ">"); 
+		assertTrue(output.equals("ø"));
+		
+		output = StringHelper.getNormalizedString("ł");
+		System.out.println("ł <" + output + ">"); 
+		assertTrue(output.equals("ł"));
 	}
 
 }
